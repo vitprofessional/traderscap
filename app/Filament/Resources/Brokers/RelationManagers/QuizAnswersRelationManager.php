@@ -86,11 +86,80 @@ class QuizAnswersRelationManager extends RelationManager
             ])
             ->filters([])
             ->headerActions([
-                CreateAction::make()
-                    ->label('Attach Answer'),
+                Action::make('attach')
+                    ->label('Attach Answer')
+                    ->icon('heroicon-m-paper-clip')
+                    ->color('success')
+                    ->form([
+                        Select::make('quiz_answer_id')
+                            ->label('Select Quiz Answer')
+                            ->helperText('Choose which quiz answer matches this broker')
+                            ->options(function () {
+                                // Get already attached answer IDs
+                                $attachedAnswerIds = $this->getOwnerRecord()
+                                    ->quizAnswers()
+                                    ->pluck('quiz_answers.id')
+                                    ->toArray();
+                                
+                                $options = [];
+                                $questions = QuizQuestion::with('answers')
+                                    ->where('is_active', true)
+                                    ->orderBy('order')
+                                    ->get();
+                                
+                                foreach ($questions as $question) {
+                                    foreach ($question->answers as $answer) {
+                                        // Only include answers that are not already attached
+                                        if (!in_array($answer->id, $attachedAnswerIds)) {
+                                            $options[$answer->id] = '❓ ' . $question->title . ' ➜ ✓ ' . $answer->text;
+                                        }
+                                    }
+                                }
+                                
+                                return $options;
+                            })
+                            ->searchable()
+                            ->required()
+                            ->preload(),
+                        TextInput::make('weight')
+                            ->label('Weight (1-10)')
+                            ->helperText('Higher weight = stronger match')
+                            ->numeric()
+                            ->default(1)
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(10),
+                    ])
+                    ->action(function (array $data) {
+                        $this->getOwnerRecord()->quizAnswers()->attach($data['quiz_answer_id'], [
+                            'weight' => $data['weight'],
+                        ]);
+                    })
+                    ->successNotificationTitle('Answer attached successfully'),
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->form([
+                        TextInput::make('weight')
+                            ->label('Weight (1-10)')
+                            ->helperText('Higher weight = stronger match')
+                            ->numeric()
+                            ->default(fn ($record) => $record->pivot->weight)
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(10),
+                    ])
+                    ->fillForm(function ($record) {
+                        return [
+                            'weight' => $record->pivot->weight,
+                        ];
+                    })
+                    ->using(function ($record, array $data) {
+                        $this->getOwnerRecord()->quizAnswers()->updateExistingPivot($record->id, [
+                            'weight' => $data['weight'],
+                        ]);
+                        return $record;
+                    }),
                 Action::make('detach')
                     ->label('Detach')
                     ->icon('heroicon-m-x-mark')
