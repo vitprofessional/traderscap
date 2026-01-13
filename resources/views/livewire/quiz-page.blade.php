@@ -85,7 +85,7 @@
                                         <div class="flex items-center gap-3">
                                             <span class="text-lg font-bold text-indigo-600">#{{ $index + 1 }}</span>
                                             @if ($broker->logo)
-                                                <img src="{{ asset('storage/' . $broker->logo) }}" alt="{{ $broker->name }}" class="h-12 w-12 object-contain rounded" onerror="this.style.display='none'">
+                                                <img src="{{ asset('storage/app/public/brokers/logos/' . $broker->logo) }}" alt="{{ $broker->name }}" class="h-12 w-12 object-contain rounded" onerror="this.style.display='none'">
                                             @endif
                                             <div>
                                                 <p class="font-medium text-gray-900">{{ $broker->name }}</p>
@@ -153,7 +153,7 @@
                                             <div class="flex items-center gap-3 mb-2">
                                                 <span class="text-2xl font-bold text-indigo-600">#{{ $index + 1 }}</span>
                                                 @if ($broker->logo)
-                                                <img src="{{ asset('storage/' . $broker->logo) }}" alt="{{ $broker->name }}" class="h-12 w-12 object-contain rounded" onerror="this.style.display='none'">
+                                                <img src="{{ asset('storage/app/public/brokers/logos/' . $broker->logo) }}" alt="{{ $broker->name }}" class="h-12 w-12 object-contain rounded" onerror="this.style.display='none'">
                                                 @endif
                                                 <h3 class="text-xl font-semibold text-gray-900">{{ $broker->name }}</h3>
                                             </div>
