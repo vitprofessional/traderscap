@@ -201,9 +201,9 @@
                                         @endif
                                     </div>
 
-                                    @if ($broker->pros || $broker->cons)
+                                    @if (is_array($broker->pros) && count($broker->pros) > 0 || is_array($broker->cons) && count($broker->cons) > 0)
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            @if ($broker->pros)
+                                            @if (is_array($broker->pros) && count($broker->pros) > 0)
                                                 <div>
                                                     <p class="text-sm font-semibold text-green-700 mb-2">Pros:</p>
                                                     <ul class="text-sm text-gray-700 space-y-1">
@@ -216,7 +216,7 @@
                                                     </ul>
                                                 </div>
                                             @endif
-                                            @if ($broker->cons)
+                                            @if (is_array($broker->cons) && count($broker->cons) > 0)
                                                 <div>
                                                     <p class="text-sm font-semibold text-red-700 mb-2">Cons:</p>
                                                     <ul class="text-sm text-gray-700 space-y-1">
