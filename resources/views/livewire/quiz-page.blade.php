@@ -1,8 +1,22 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Find My Best Broker</h1>
-            <p class="text-gray-600 mb-8">Discover the perfect forex broker for your trading needs</p>
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <!-- Top Menu Bar -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{{ url('/') }}" class="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">TradersCap</a>
+            <div class="space-x-4">
+                <a href="{{ url('/') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+                @auth
+                    <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Admin Panel</a>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
+    <div class="py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Find My Best Broker</h1>
+                <p class="text-gray-600 mb-8">Discover the perfect forex broker for your trading needs</p>
 
             @if (!$submitted)
                 @if ($totalQuestions > 0)
@@ -260,5 +274,6 @@
                 </div>
             @endif
         </div>
+    </div>
     </div>
 </div>
