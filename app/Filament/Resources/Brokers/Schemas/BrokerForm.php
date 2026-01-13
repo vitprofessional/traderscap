@@ -27,6 +27,7 @@ class BrokerForm
                 FileUpload::make('logo')
                     ->label('Logo')
                     ->image()
+                    ->disk('public')
                     ->directory('brokers/logos')
                     ->visibility('public')
                     ->preserveFilenames()

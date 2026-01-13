@@ -30,23 +30,41 @@
                         @endif
 
                         <!-- Answers -->
-                        <div class="space-y-3">
-                            @forelse ($question->answers as $answer)
-                                <div wire:click="selectAnswer({{ $answer->id }})" class="w-full text-left flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors {{ isset($answers[$currentQuestion]) && $answers[$currentQuestion] === $answer->id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300' }}">
-                                    <input type="radio" name="answer" value="{{ $answer->id }}"
-                                        {{ isset($answers[$currentQuestion]) && $answers[$currentQuestion] === $answer->id ? 'checked' : '' }}
-                                        class="w-4 h-4 text-indigo-600 cursor-pointer pointer-events-none">
-                                    <div class="ml-4 flex-1">
-                                        <p class="font-medium text-gray-900">{{ $answer->text }}</p>
-                                        @if ($answer->description)
-                                            <p class="text-sm text-gray-500">{{ $answer->description }}</p>
-                                        @endif
+                        @if (count($question->answers) > 5)
+                            <!-- Dropdown for more than 5 answers -->
+                            <div class="mb-4">
+                                <select 
+                                    wire:model.live="answers.{{ $currentQuestion }}"
+                                    class="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none text-base"
+                                >
+                                    <option value="">Select an answer...</option>
+                                    @foreach ($question->answers as $answer)
+                                        <option value="{{ $answer->id }}">
+                                            {{ $answer->text }}@if($answer->description) - {{ $answer->description }}@endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            <!-- Radio buttons for 5 or fewer answers -->
+                            <div class="space-y-3">
+                                @forelse ($question->answers as $answer)
+                                    <div wire:click="selectAnswer({{ $answer->id }})" class="w-full text-left flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors {{ isset($answers[$currentQuestion]) && $answers[$currentQuestion] === $answer->id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300' }}">
+                                        <input type="radio" name="answer" value="{{ $answer->id }}"
+                                            {{ isset($answers[$currentQuestion]) && $answers[$currentQuestion] === $answer->id ? 'checked' : '' }}
+                                            class="w-4 h-4 text-indigo-600 cursor-pointer pointer-events-none">
+                                        <div class="ml-4 flex-1">
+                                            <p class="font-medium text-gray-900">{{ $answer->text }}</p>
+                                            @if ($answer->description)
+                                                <p class="text-sm text-gray-500">{{ $answer->description }}</p>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
-                            @empty
-                                <p class="text-red-600">No answers loaded for this question</p>
-                            @endforelse
-                        </div>
+                                @empty
+                                    <p class="text-red-600">No answers loaded for this question</p>
+                                @endforelse
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Live Broker Recommendations -->
