@@ -33,12 +33,14 @@ class BrokerForm
                     ->preserveFilenames()
                     ->imageEditor(),
                 TextInput::make('min_deposit')
-                    ->numeric()
+                    ->label('Minimum Deposit')
+                    ->placeholder('e.g., $100, 100 USD, No minimum')
                     ->default(null),
                 TextInput::make('regulation')
                     ->default(null),
                 TextInput::make('years_in_business')
-                    ->numeric()
+                    ->label('Years in Business')
+                    ->placeholder('e.g., 10, 10+, Over 10 years')
                     ->default(null),
                 TagsInput::make('features')
                     ->placeholder('Add a feature and press enter')

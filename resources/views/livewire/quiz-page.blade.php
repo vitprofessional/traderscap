@@ -198,7 +198,7 @@
                                         @if ($broker->min_deposit)
                                             <div>
                                                 <p class="text-sm text-gray-600">Min. Deposit</p>
-                                                <p class="text-lg font-semibold text-gray-900">${{ number_format($broker->min_deposit, 2) }}</p>
+                                                <p class="text-lg font-semibold text-gray-900">{{ $broker->min_deposit }}</p>
                                             </div>
                                         @endif
                                         @if ($broker->regulation)
@@ -210,7 +210,7 @@
                                         @if ($broker->years_in_business)
                                             <div>
                                                 <p class="text-sm text-gray-600">Years in Business</p>
-                                                <p class="text-lg font-semibold text-gray-900">{{ $broker->years_in_business }}+ years</p>
+                                                <p class="text-lg font-semibold text-gray-900">{{ $broker->years_in_business }}</p>
                                             </div>
                                         @endif
                                     </div>

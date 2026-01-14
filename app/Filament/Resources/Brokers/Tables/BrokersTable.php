@@ -26,12 +26,14 @@ class BrokersTable
                 TextColumn::make('website')
                     ->searchable(),
                 TextColumn::make('min_deposit')
-                    ->numeric()
+                    ->label('Min. Deposit')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('regulation')
                     ->searchable(),
                 TextColumn::make('years_in_business')
-                    ->numeric()
+                    ->label('Years in Business')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('rating')
                     ->numeric()
