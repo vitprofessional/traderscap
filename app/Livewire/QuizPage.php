@@ -39,6 +39,8 @@ class QuizPage extends Component
 
         foreach (Broker::where('is_active', true)->get() as $broker) {
             $score = 0;
+            $matchedAnswers = 0;
+
             foreach ($this->answers as $answerId) {
                 $match = $broker->matches()
                     ->where('quiz_answer_id', $answerId)
@@ -46,9 +48,12 @@ class QuizPage extends Component
 
                 if ($match) {
                     $score += $match->weight;
+                    $matchedAnswers++;
                 }
             }
-            if ($score > 0) {
+
+            // Only include brokers that match ALL answered questions
+            if ($matchedAnswers === count($this->answers)) {
                 $brokerScores[$broker->id] = [
                     'broker' => $broker,
                     'score' => $score,
@@ -78,11 +83,13 @@ class QuizPage extends Component
 
     public function submitQuiz()
     {
-        // Calculate broker scores
+        // Calculate broker scores - only include brokers matching ALL answers
         $brokerScores = [];
 
         foreach (Broker::where('is_active', true)->get() as $broker) {
             $score = 0;
+            $matchedAnswers = 0;
+
             foreach ($this->answers as $answerId) {
                 $match = $broker->matches()
                     ->where('quiz_answer_id', $answerId)
@@ -90,9 +97,12 @@ class QuizPage extends Component
 
                 if ($match) {
                     $score += $match->weight;
+                    $matchedAnswers++;
                 }
             }
-            if ($score > 0) {
+
+            // Only include brokers that match ALL answered questions
+            if ($matchedAnswers === count($this->answers)) {
                 $brokerScores[$broker->id] = [
                     'broker' => $broker,
                     'score' => $score,
