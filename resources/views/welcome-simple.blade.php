@@ -12,7 +12,7 @@
             <h1 class="text-2xl font-bold text-indigo-600">TradersCap</h1>
             <div class="space-x-4">
                 @auth
-                    <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-gray-900">Admin Panel</a>
+                    <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-gray-900">Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="text-gray-600 hover:text-gray-900">Logout</button>
@@ -23,6 +23,10 @@
                         <a href="{{ route('register') }}" class="text-gray-600 hover:text-gray-900">Register</a>
                     @endif
                 @endauth
+
+                @if(auth('admin')->check())
+                    <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-gray-900">Admin Panel</a>
+                @endif
             </div>
         </div>
     </nav>

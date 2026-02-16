@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
+    <script src="{{ asset('build/assets/app.js') }}" defer></script>
+    <style>
+        :root{--bg:#f7fafc;--card:#ffffff;--muted:#6b7280;--accent:#0f172a}
+        body{background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+        .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+        .card{width:100%;max-width:520px;background:var(--card);box-shadow:0 10px 30px rgba(2,6,23,0.08);border-radius:12px;padding:2rem}
+        .brand{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem}
+        .brand-logo{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:inline-block}
+        h1{font-size:1.125rem;margin:0;color:var(--accent)}
+        p.summary{margin:0;margin-top:0.25rem;color:var(--muted);font-size:0.95rem}
+        label{display:block;font-size:0.875rem;color:#111827;margin-bottom:0.35rem}
+        input[type=text],input[type=email],input[type=password]{width:100%;padding:0.65rem;border:1px solid #e6e9ef;border-radius:8px;font-size:0.95rem}
+        .btn{background:#111827;color:#fff;padding:0.65rem 0.9rem;border-radius:8px;border:none;font-weight:600}
+        .error{background:#fff5f5;color:#b91c1c;padding:0.6rem;border-radius:8px;margin-bottom:0.75rem;border:1px solid #fecaca}
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="card">
+            <div class="brand">
+                <span class="brand-logo" aria-hidden="true"></span>
+                <div>
+                    <h1>Create your account</h1>
+                    <p class="summary">Register to access your dashboard</p>
+                </div>
+            </div>
+
+            @if($errors->any())
+                <div class="error">{{ $errors->first() }}</div>
+            @endif
+
+            <form method="POST" action="{{ route('register.attempt') }}" novalidate>
+                @csrf
+
+                <div style="margin-top:0.6rem">
+                    <label for="name">Full name</label>
+                    <input id="name" name="name" type="text" value="{{ old('name') }}" required autocomplete="name" autofocus>
+                </div>
+
+                <div style="margin-top:0.9rem">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email">
+                </div>
+
+                <div style="margin-top:0.9rem">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" required autocomplete="new-password">
+                </div>
+
+                <div style="margin-top:0.9rem">
+                    <label for="password_confirmation">Confirm Password</label>
+                    <input id="password_confirmation" name="password_confirmation" type="password" required>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:0.5rem;align-items:center;margin-top:1rem">
+                    <button class="btn" type="submit">Create account</button>
+                </div>
+            </form>
+
+            <div style="margin-top:1rem;color:var(--muted);font-size:0.85rem;text-align:center">
+                <small>Already registered? <a href="{{ route('login') }}">Log in</a></small>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

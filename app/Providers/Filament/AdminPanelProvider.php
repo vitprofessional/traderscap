@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
+            ->authGuard(config('filament.auth.guard', 'admin'))
             ->path('admin')
             ->login(Login::class)
             ->registration(Register::class)
