@@ -51,4 +51,24 @@ class AdminTicketReplyController extends Controller
 
         return back()->with('success', 'Reply posted.');
     }
+
+    /**
+     * Return messages for a ticket as JSON (used by admin partial polling).
+     */
+    public function messages(Request $request, Ticket $ticket)
+    {
+        $msgs = $ticket->messages()->orderBy('created_at')->get()->map(function ($m) {
+            return [
+                'id' => $m->id,
+                'message' => $m->message,
+                'attachment' => $m->attachment ? Storage::disk('public')->url($m->attachment) : null,
+                'created_at' => $m->created_at->toDateTimeString(),
+                'diff' => $m->created_at->diffForHumans(),
+                'is_admin' => (bool) ($m->is_admin ?? ($m->admin_id ? true : false)),
+                'author' => $m->is_admin ? ($m->admin?->name ?? 'Admin') : ($m->user?->name ?? 'Customer'),
+            ];
+        });
+
+        return response()->json(['messages' => $msgs]);
+    }
 }

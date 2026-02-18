@@ -21,29 +21,30 @@
     <div class="admin-chat-card bg-white shadow rounded-lg">
         <div class="admin-chat-header p-4 bg-gray-100">
             <div>
-                <div class="text-sm font-medium">Ticket ID #{{ $ticket->id ?? '' }}</div>
-                <div class="text-lg text-gray-500">Subject: {{ $ticket->subject ?? 'No subject' }}</div>
+                <div class="text-sm font-medium">Ticket ID #<?php echo e($ticket->id ?? ''); ?></div>
+                <div class="text-lg text-gray-500">Subject: <?php echo e($ticket->subject ?? 'No subject'); ?></div>
             </div>
-            <div class="text-sm text-gray-600">Status: <span class="font-medium">{{ ucfirst($ticket->status ?? 'open') }}</span></div>
+            <div class="text-sm text-gray-600">Status: <span class="font-medium"><?php echo e(ucfirst($ticket->status ?? 'open')); ?></span></div>
         </div>
 
         <div id="admin-chat-messages" wire:poll.3s class="admin-chat-body p-4 bg-white">
-            @foreach($messages as $m)
-                @php $isAdmin = $m->is_admin ?? ($m->admin_id ? true : false); @endphp
-                <div class="admin-msg-row {{ $isAdmin ? 'end' : '' }}">
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php $isAdmin = $m->is_admin ?? ($m->admin_id ? true : false); ?>
+                <div class="admin-msg-row <?php echo e($isAdmin ? 'end' : ''); ?>">
                     <div>
-                        @if(!$isAdmin)
-                            <div style="width:36px;height:36px;border-radius:9999px;background:#eef2f6;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-weight:600;color:#0f172a">{{ strtoupper(substr($m->user?->name ?? 'C',0,1)) }}</div>
-                        @endif
-                        <div class="admin-msg-bubble {{ $isAdmin ? 'admin' : 'user' }}">{!! nl2br(e($m->message)) !!}
-                            @if($m->attachment)
-                                <div style="margin-top:8px;margin-bottom:0;font-size:13px;"><a href="{{ asset('storage/app/public/' . $m->attachment) }}" target="_blank" style="color:#ffff00;text-decoration:underline">View attachment</a></div>
-                            @endif
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$isAdmin): ?>
+                            <div style="width:36px;height:36px;border-radius:9999px;background:#eef2f6;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-weight:600;color:#0f172a"><?php echo e(strtoupper(substr($m->user?->name ?? 'C',0,1))); ?></div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <div class="admin-msg-bubble <?php echo e($isAdmin ? 'admin' : 'user'); ?>"><?php echo nl2br(e($m->message)); ?>
+
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($m->attachment): ?>
+                                <div style="margin-top:8px;margin-bottom:0;font-size:13px;"><a href="<?php echo e(asset('storage/app/public/' . $m->attachment)); ?>" target="_blank" style="color:#ffff00;text-decoration:underline">View attachment</a></div>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
-                        <div style="font-size:12px;color:#6b7280;margin-top:6px;{{ $isAdmin ? 'text-align:right' : '' }}">{{ $m->created_at->diffForHumans() }} @if(!$isAdmin && $m->user) • {{ $m->user->name }} @endif</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:6px;<?php echo e($isAdmin ? 'text-align:right' : ''); ?>"><?php echo e($m->created_at->diffForHumans()); ?> <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$isAdmin && $m->user): ?> • <?php echo e($m->user->name); ?> <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?></div>
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
 
         <div class="admin-chat-input">
@@ -66,7 +67,14 @@
                         </button>
                     </div>
 
-                    @error('attachment') <div class="text-sm text-red-600">{{ $message }}</div> @enderror
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['attachment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <div class="text-sm text-red-600"><?php echo e($message); ?></div> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     <button type="submit" class="btn send-with-icon" style="display:inline-flex;align-items:center;gap:8px">
                         <span class="icon send-icon" aria-hidden="true">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20 1-7 7-7z"/></svg>
@@ -103,3 +111,4 @@
     </script>
 
 </div>
+<?php /**PATH C:\xampp\htdocs\traderscap\resources\views/livewire/admin-ticket-chat.blade.php ENDPATH**/ ?>

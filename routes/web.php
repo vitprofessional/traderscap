@@ -43,10 +43,14 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 // Filament expects a named admin logout route for the panel; provide an alias.
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('filament.admin.auth.logout');
 
-// Admin ticket reply (used by Filament inline reply form)
 Route::post('/admin/tickets/{ticket}/reply', [\App\Http\Controllers\AdminTicketReplyController::class, 'store'])
     ->middleware('auth:admin')
     ->name('admin.tickets.reply');
+
+// messages JSON (polled by admin chat partial)
+Route::get('/admin/tickets/{ticket}/messages', [\App\Http\Controllers\AdminTicketReplyController::class, 'messages'])
+    ->middleware('auth:admin')
+    ->name('admin.tickets.messages');
 
 // Admin password reset
 Route::get('/admin/password/reset', [AdminPasswordController::class, 'showLinkRequestForm'])->name('admin.password.request');

@@ -14,8 +14,11 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Placeholder;
 use Filament\Actions\Action as FilamentAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\TicketResource\RelationManagers\TicketMessagesRelationManager;
 
 class TicketResource extends Resource
@@ -39,9 +42,16 @@ class TicketResource extends Resource
                 ->preserveFilenames()
                 ->label('Attachment')
                 ->helperText('Optional attachment for this ticket'),
-            Placeholder::make('admin_inline_chat')
-                ->content(fn (callable $get) => view('filament.partials.admin-ticket-chat', ['ticket_id' => $get('id')]))
-                ->visible(fn (callable $get) => (bool) $get('id')),
+            // Inline admin chat removed from edit form to avoid Livewire multiple-root errors.
+            // Use the dedicated Reply page instead: /admin/tickets/reply?ticket={id}
+            Select::make('status')
+                ->label('Status')
+                ->options([
+                    'open' => 'Open',
+                    'resolved' => 'Resolved',
+                ])
+                ->default('open')
+                ->required(),
         ]);
     }
 
@@ -57,44 +67,17 @@ class TicketResource extends Resource
             TextColumn::make('status')->sortable(),
             TextColumn::make('priority')->sortable(),
             TextColumn::make('created_at')->dateTime(),
-        ])->filters([])
+            ])->filters([])
             ->actions([
+                EditAction::make(),
                 FilamentAction::make('reply')
                     ->label('Reply')
-                    ->form([
-                        Textarea::make('message')->label('Message')->required(),
-                        FileUpload::make('attachment')
-                            ->disk('public')
-                            ->directory('ticket_attachments')
-                            ->visibility('public')
-                            ->preserveFilenames(),
-                    ])
-                    ->action(function (Ticket $record, array $data) {
-                        $adminId = auth()->id();
-                        $msg = \App\Models\TicketMessage::create([
-                            'ticket_id' => $record->id,
-                            'user_id' => null,
-                            'message' => $data['message'] ?? null,
-                            'is_admin' => true,
-                            'attachment' => $data['attachment'] ?? null,
-                        ]);
-
-                        $record->status = 'open';
-                        $record->save();
-
-                        if ($record->user) {
-                            try {
-                                $record->user->notify(new \App\Notifications\NewTicketReply($msg));
-                            } catch (\Throwable $e) {
-                                logger()->error('Failed to notify user about admin reply: '.$e->getMessage());
-                            }
-                        }
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('Reply sent')
-                            ->success()
-                            ->send();
-                    }),
+                    ->url(fn (Ticket $record): string => url(config('filament.path', 'admin') . '/tickets/reply?ticket=' . $record->id)),
+                FilamentAction::make('mark_resolved')
+                    ->label('Mark Resolved')
+                    ->action(fn (Ticket $record) => $record->update(['status' => 'resolved']))
+                    ->visible(fn (Ticket $record) => $record->status !== 'resolved'),
+                DeleteAction::make(),
             ]);
     }
 
