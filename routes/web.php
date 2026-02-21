@@ -32,11 +32,12 @@ use App\Models\Testimonial;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\CustomerProfileController;
 
 // Testimonial deletion is handled via Filament-native actions.
 
 // Admin auth routes (separate login form)
-Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('filament.admin.auth.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.attempt');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
@@ -69,7 +70,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/investment-plans/{package}/activate', [\App\Http\Controllers\InvestmentPlanController::class, 'activate'])->name('investment-plans.activate');
     Route::get('/complaints', fn() => view('customer.complaints'))->name('complaints');
     Route::get('/partners', fn() => view('customer.partners'))->name('partners');
-    Route::get('/profile', fn() => view('customer.profile'))->name('profile');
+    Route::get('/profile', [CustomerProfileController::class, 'edit'])->name('profile');
+    Route::post('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/avatar', [CustomerProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+    Route::post('/profile/password', [CustomerProfileController::class, 'updatePassword'])->name('profile.password.update');
     
     // Customer complaints/ticketing
     Route::get('/complaints', [\App\Http\Controllers\CustomerComplaintController::class,'index'])->name('complaints');

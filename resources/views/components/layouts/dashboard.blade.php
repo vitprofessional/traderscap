@@ -62,9 +62,15 @@
             <div class="flex items-center gap-4">
                 @php $u = auth()->user(); @endphp
                 <div class="flex items-center gap-3">
+                    @php
+                        $avatarSrc = null;
+                        if ($u && !empty($u->avatar)) {
+                            $avatarSrc = str_starts_with($u->avatar, 'http') ? $u->avatar : asset('storage/app/public/' . $u->avatar);
+                        }
+                    @endphp
                     <div class="w-10 h-10 bg-white rounded-full overflow-hidden">
-                        @if($u && isset($u->avatar))
-                            <img src="{{ $u->avatar }}" alt="avatar" class="w-full h-full object-cover">
+                        @if($avatarSrc)
+                            <img src="{{ $avatarSrc }}" alt="avatar" class="w-full h-full object-cover">
                         @else
                             <img src="https://www.gravatar.com/avatar/{{ md5(strtolower(trim($u->email ?? '')) ) }}?s=80&d=identicon" alt="avatar" class="w-full h-full object-cover">
                         @endif
