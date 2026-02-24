@@ -26,6 +26,7 @@ Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
+// Public quiz route (also accessible from authenticated area)
 Route::get('/quiz', \App\Livewire\QuizPage::class)->name('quiz');
 
 use App\Models\Testimonial;
@@ -33,6 +34,8 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerProfileController;
+use App\Http\Controllers\AffiliateController;
+use App\Http\Controllers\BrokerFinderController;
 
 // Testimonial deletion is handled via Filament-native actions.
 
@@ -65,11 +68,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-plans', [\App\Http\Controllers\CustomerPackageController::class, 'index'])->name('my-plans');
     Route::post('/my-plans/{userPackage}/cancel', [\App\Http\Controllers\CustomerPackageController::class, 'cancel'])->name('my-plans.cancel');
     Route::post('/my-plans/{userPackage}/renew', [\App\Http\Controllers\CustomerPackageController::class, 'renew'])->name('my-plans.renew');
-    Route::get('/investment-plans', fn() => view('customer.investment-plans'))->name('investment-plans');
     Route::get('/investment-plans', [\App\Http\Controllers\InvestmentPlanController::class, 'index'])->name('investment-plans');
-    Route::post('/investment-plans/{package}/activate', [\App\Http\Controllers\InvestmentPlanController::class, 'activate'])->name('investment-plans.activate');
+    Route::get('/investment-plans/{package}/request', [\App\Http\Controllers\InvestmentPlanController::class, 'requestForm'])->name('investment-plans.request');
+    Route::post('/investment-plans/{package}/request', [\App\Http\Controllers\InvestmentPlanController::class, 'submitRequest'])->name('investment-plans.request.submit');
+    Route::get('/custom-best-broker', [BrokerFinderController::class, 'chooser'])->name('custom-best-broker');
+    Route::get('/find-broker', [BrokerFinderController::class, 'index'])->name('find-broker');
     Route::get('/complaints', fn() => view('customer.complaints'))->name('complaints');
-    Route::get('/partners', fn() => view('customer.partners'))->name('partners');
+    
+    // Affiliate routes
+    Route::get('/partners', [AffiliateController::class, 'index'])->name('partners');
+    Route::get('/partners/apply', [AffiliateController::class, 'apply'])->name('partners.apply');
+    Route::post('/partners/apply', [AffiliateController::class, 'storeApplication'])->name('partners.store-application');
+    Route::post('/affiliate/referral-link', [AffiliateController::class, 'getReferralLink'])->name('affiliate.referral-link');
+    
     Route::get('/profile', [CustomerProfileController::class, 'edit'])->name('profile');
     Route::post('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [CustomerProfileController::class, 'updateAvatar'])->name('profile.avatar.update');

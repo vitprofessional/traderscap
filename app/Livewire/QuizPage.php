@@ -14,9 +14,11 @@ class QuizPage extends Component
     public $results = [];
     public $questions = [];
     public $totalQuestions = 0;
+    public $embedded = false;
 
-    public function mount()
+    public function mount($embedded = false)
     {
+        $this->embedded = (bool) $embedded;
         $this->questions = QuizQuestion::where('is_active', true)
             ->orderBy('order')
             ->with('answers')
@@ -26,7 +28,12 @@ class QuizPage extends Component
 
     public function selectAnswer($answerId)
     {
-        $this->answers[$this->currentQuestion] = $answerId;
+        if ($answerId === null || $answerId === '') {
+            unset($this->answers[$this->currentQuestion]);
+            return;
+        }
+
+        $this->answers[$this->currentQuestion] = (int) $answerId;
     }
 
     public function getLiveResults()
@@ -69,6 +76,10 @@ class QuizPage extends Component
 
     public function nextQuestion()
     {
+        if (!array_key_exists($this->currentQuestion, $this->answers)) {
+            return;
+        }
+
         if ($this->currentQuestion < $this->totalQuestions - 1) {
             $this->currentQuestion++;
         }
@@ -83,6 +94,10 @@ class QuizPage extends Component
 
     public function submitQuiz()
     {
+        if (!array_key_exists($this->currentQuestion, $this->answers)) {
+            return;
+        }
+
         // Calculate broker scores - only include brokers matching ALL answers
         $brokerScores = [];
 
@@ -114,6 +129,7 @@ class QuizPage extends Component
         usort($brokerScores, fn($a, $b) => $b['score'] <=> $a['score']);
 
         $this->results = $brokerScores;
+
         $this->submitted = true;
     }
 
@@ -127,6 +143,7 @@ class QuizPage extends Component
 
     public function render()
     {
-        return view('livewire.quiz-page');
+        return view('livewire.quiz-page')
+            ->layout('components.layouts.app');
     }
 }

@@ -8,7 +8,8 @@ class CustomHandleRequests extends BaseHandleRequests
 {
     public function getUpdateUri()
     {
-        // Return full absolute URL instead of relative path
-        return url('/livewire/update');
+        $path = parse_url(url('/livewire/update'), PHP_URL_PATH);
+
+        return $path ?: '/livewire/update';
     }
 }

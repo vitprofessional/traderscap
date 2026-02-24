@@ -12,10 +12,16 @@ class CustomerPackageController extends Controller
     {
         $user = $request->user();
 
-        $userPackages = $user ? $user->userPackages()->with('package')->orderByDesc('starts_at')->get() : collect();
+        $userPackage = $user
+            ? $user->userPackages()
+                ->with('package')
+                ->whereIn('status', ['pending', 'active_waiting', 'active', 'expired'])
+                ->latest()
+                ->first()
+            : null;
 
         return view('customer.my-plans', [
-            'userPackages' => $userPackages,
+            'userPackage' => $userPackage,
         ]);
     }
 
@@ -43,17 +49,14 @@ class CustomerPackageController extends Controller
         }
 
         $package = $userPackage->package;
-        $startsAt = now();
-        $endsAt = $startsAt->copy()->addDays($package->duration_days ?? 30);
 
-        \App\Models\UserPackage::create([
-            'user_id' => $user->id,
-            'package_id' => $package->id,
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
-            'status' => 'active',
+        $userPackage->update([
+            'package_id' => $package?->id,
+            'starts_at' => null,
+            'ends_at' => null,
+            'status' => 'pending',
         ]);
 
-        return redirect()->route('my-plans')->with('success', 'Package renewed.');
+        return redirect()->route('my-plans')->with('success', 'Renewal request submitted and pending admin verification.');
     }
 }

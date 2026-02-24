@@ -52,4 +52,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserPackage::class);
     }
+
+    public function affiliate()
+    {
+        return $this->hasOne(Affiliate::class);
+    }
+
+    public function referredByAffiliate()
+    {
+        return $this->hasMany(AffiliateReferral::class, 'referred_user_id');
+    }
 }

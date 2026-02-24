@@ -1,4 +1,9 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+@php
+    $isEmbedded = $embedded ?? false;
+@endphp
+
+<div class="{{ $isEmbedded ? '' : 'min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100' }}">
+@if (!$isEmbedded)
     <!-- Top Menu Bar -->
     <nav class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -6,14 +11,15 @@
             <div class="space-x-4">
                 <a href="{{ url('/') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
                 @auth
-                    <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Admin Panel</a>
+                    <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Customer Panel</a>
                 @endauth
             </div>
         </div>
     </nav>
+@endif
 
-    <div class="py-12 px-4">
-        <div class="max-w-4xl mx-auto">
+    <div class="{{ $isEmbedded ? '' : 'py-12 px-4' }}">
+        <div class="{{ $isEmbedded ? '' : 'max-w-4xl mx-auto' }}">
             <div class="bg-white rounded-lg shadow-xl p-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-2">Find My Best Broker</h1>
                 <p class="text-gray-600 mb-8">Discover the perfect forex broker for your trading needs</p>
@@ -48,12 +54,12 @@
                             <!-- Dropdown for more than 5 answers -->
                             <div class="mb-4">
                                 <select 
-                                    wire:model.live="answers.{{ $currentQuestion }}"
+                                    wire:change="selectAnswer($event.target.value)"
                                     class="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none text-base"
                                 >
                                     <option value="">Select an answer...</option>
                                     @foreach ($question->answers as $answer)
-                                        <option value="{{ $answer->id }}">
+                                        <option value="{{ $answer->id }}" {{ (int) $selectedAnswer === (int) $answer->id ? 'selected' : '' }}>
                                             {{ $answer->text }}@if($answer->description) - {{ $answer->description }}@endif
                                         </option>
                                     @endforeach
@@ -63,17 +69,20 @@
                             <!-- Radio buttons for 5 or fewer answers -->
                             <div class="space-y-3">
                                 @forelse ($question->answers as $answer)
-                                    <div wire:click="selectAnswer({{ $answer->id }})" class="w-full text-left flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors {{ isset($answers[$currentQuestion]) && $answers[$currentQuestion] === $answer->id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300' }}">
+                                    <button type="button"
+                                        wire:key="question-{{ $question->id }}-answer-{{ $answer->id }}"
+                                        wire:click="selectAnswer({{ $answer->id }})"
+                                        class="w-full text-left flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors {{ (int) $selectedAnswer === (int) $answer->id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300' }}">
                                         <input type="radio" name="answer" value="{{ $answer->id }}"
-                                            {{ isset($answers[$currentQuestion]) && $answers[$currentQuestion] === $answer->id ? 'checked' : '' }}
-                                            class="w-4 h-4 text-indigo-600 cursor-pointer pointer-events-none">
+                                            {{ (int) $selectedAnswer === (int) $answer->id ? 'checked' : '' }}
+                                            class="w-4 h-4 text-indigo-600 pointer-events-none">
                                         <div class="ml-4 flex-1">
                                             <p class="font-medium text-gray-900">{{ $answer->text }}</p>
                                             @if ($answer->description)
                                                 <p class="text-sm text-gray-500">{{ $answer->description }}</p>
                                             @endif
                                         </div>
-                                    </div>
+                                    </button>
                                 @empty
                                     <p class="text-red-600">No answers loaded for this question</p>
                                 @endforelse
@@ -129,13 +138,13 @@
 
                         @if ($currentQuestion < $totalQuestions - 1)
                             <button wire:click="nextQuestion"
-                                {{ !isset($answers[$currentQuestion]) ? 'disabled' : '' }}
+                                {{ empty($selectedAnswer) ? 'disabled' : '' }}
                                 class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                 Next →
                             </button>
                         @else
                             <button wire:click="submitQuiz"
-                                {{ !isset($answers[$currentQuestion]) ? 'disabled' : '' }}
+                                {{ empty($selectedAnswer) ? 'disabled' : '' }}
                                 class="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                 Find My Brokers →
                             </button>
@@ -273,7 +282,7 @@
                     </button>
                 </div>
             @endif
+            </div>
         </div>
-    </div>
     </div>
 </div>

@@ -5,7 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Livewire\Livewire;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Admin;
 use App\Policies\AdminPolicy;
@@ -19,7 +18,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Replace Livewire's HandleRequests with our custom one that returns full URLs
         $this->app->singleton(
             \Livewire\Mechanisms\HandleRequests\HandleRequests::class,
             \App\Livewire\CustomHandleRequests::class
@@ -31,6 +29,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Guard against environments where APP_KEY is overridden/empty in HTTP context.
+        if (empty(config('app.key'))) {
+            $envPath = base_path('.env');
+
+            if (is_file($envPath)) {
+                $envContent = file_get_contents($envPath) ?: '';
+
+                if (preg_match('/^APP_KEY=(.+)$/m', $envContent, $matches)) {
+                    $resolvedKey = trim($matches[1], " \t\n\r\0\x0B\"'");
+
+                    if ($resolvedKey !== '') {
+                        config(['app.key' => $resolvedKey]);
+                    }
+                }
+            }
+        }
+
         // Force root URL to include subfolder path
         URL::forceRootUrl(config('app.url'));
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TradersCap - Find Your Best Broker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100">
     <nav class="bg-white shadow">
@@ -12,21 +12,17 @@
             <h1 class="text-2xl font-bold text-indigo-600">TradersCap</h1>
             <div class="space-x-4">
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Customer Panel</a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
-                        <button type="submit" class="text-gray-600 hover:text-gray-900">Logout</button>
+                        <button type="submit" class="text-gray-600 hover:text-gray-900 transition-colors">Logout</button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-900">Login</a>
+                    <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Login</a>
                     @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="text-gray-600 hover:text-gray-900">Register</a>
+                        <a href="{{ route('register') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Register</a>
                     @endif
                 @endauth
-
-                @if(auth('admin')->check())
-                    <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-gray-900">Admin Panel</a>
-                @endif
             </div>
         </div>
     </nav>

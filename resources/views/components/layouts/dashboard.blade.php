@@ -14,6 +14,7 @@
                         ['route'=>'dashboard','label'=>'Dashboard','icon'=>'home'],
                         ['route'=>'my-plans','label'=>'My Plans','icon'=>'collection'],
                         ['route'=>'investment-plans','label'=>'Investment Plans','icon'=>'credit-card'],
+                        ['route'=>'find-broker','label'=>'Find Best Broker','icon'=>'search'],
                         ['route'=>'complaints','label'=>'Complaints','icon'=>'chat'],
                         ['route'=>'partners','label'=>'Partners Corner','icon'=>'users'],
                         ['route'=>'profile','label'=>'Profile','icon'=>'user'],
@@ -35,6 +36,8 @@
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 012-2h14v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
                                 @elseif($it['icon'] === 'credit-card')
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="12" rx="2"/></svg>
+                                @elseif($it['icon'] === 'search')
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2a8 8 0 016.32 12.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"/></svg>
                                 @elseif($it['icon'] === 'chat')
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12c0 4.418-4.03 8-9 8-1.224 0-2.387-.2-3.44-.58L3 20l1.58-4.56C3.97 14.39 3 13.25 3 12V7a2 2 0 012-2h14a2 2 0 012 2v5z"/></svg>
                                 @elseif($it['icon'] === 'users')

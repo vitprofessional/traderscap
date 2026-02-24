@@ -38,6 +38,10 @@
 
             <form method="POST" action="{{ route('register.attempt') }}" novalidate>
                 @csrf
+                
+                @if(isset($referralCode))
+                    <input type="hidden" name="referral_code" value="{{ $referralCode }}">
+                @endif
 
                 <div style="margin-top:0.6rem">
                     <label for="name">Full name</label>

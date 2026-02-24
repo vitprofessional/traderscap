@@ -19,6 +19,9 @@ class BrokersTable
                 TextColumn::make('name')
                     ->searchable(),
                 ImageColumn::make('logo')
+                    ->getStateUsing(fn ($record): ?string => filled($record->logo)
+                        ? preg_replace('#^(storage/app/public|public)/#', '', $record->logo)
+                        : null)
                     ->disk('public')
                     ->label('Logo')
                     ->square()
