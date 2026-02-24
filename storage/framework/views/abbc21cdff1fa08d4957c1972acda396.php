@@ -26,6 +26,76 @@
                 <p class="text-sm text-gray-600">You have no plan yet. Start by purchasing a package.</p>
             </div>
         <?php else: ?>
+            <!-- Current Plan Details Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6">Current Plan Details</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left Column: Plan & Dates -->
+                    <div>
+                        <div class="mb-8">
+                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Package Name</p>
+                            <p class="text-2xl font-bold text-gray-900"><?php echo e($userPackage->package->name ?? 'N/A'); ?></p>
+                        </div>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($userPackage->package?->facilities) && is_array($userPackage->package->facilities)): ?>
+                            <div class="mb-8">
+                                <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Included Features</p>
+                                <ul class="text-sm text-gray-700 space-y-1">
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $userPackage->package->facilities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li class="flex items-start">
+                                            <span class="text-green-600 mr-2">✓</span>
+                                            <span><?php echo e($facility); ?></span>
+                                        </li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Start Date</p>
+                                <p class="text-lg font-semibold text-gray-900"><?php echo e($userPackage->starts_at ? $userPackage->starts_at->toFormattedDateString() : 'Pending'); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">End Date</p>
+                                <p class="text-lg font-semibold text-gray-900"><?php echo e($userPackage->ends_at ? $userPackage->ends_at->toFormattedDateString() : 'N/A'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Status, Equity & Trading Info -->
+                    <div>
+                        <div class="mb-8">
+                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Status</p>
+                            <div>
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold
+                                    <?php if($userPackage->status === 'active'): ?> bg-green-100 text-green-700
+                                    <?php elseif($userPackage->status === 'expired'): ?> bg-red-100 text-red-700
+                                    <?php else: ?> bg-amber-100 text-amber-700 <?php endif; ?>">
+                                    <?php echo e(ucfirst(str_replace('_', ' ', $userPackage->status))); ?>
+
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mb-8">
+                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Account Equity</p>
+                            <p class="text-2xl font-bold text-gray-900"><?php echo e($userPackage->equity ? '$' . number_format($userPackage->equity, 2) : 'N/A'); ?></p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Broker Details</p>
+                            <div class="text-sm text-gray-700 space-y-1">
+                                <p><span class="font-semibold">Broker:</span> <?php echo e($userPackage->broker_name ?? 'N/A'); ?></p>
+                                <p><span class="font-semibold">Trading ID:</span> <?php echo e($userPackage->trading_id ?? 'N/A'); ?></p>
+                                <p><span class="font-semibold">Server:</span> <?php echo e($userPackage->trading_server ?? 'N/A'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
