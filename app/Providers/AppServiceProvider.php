@@ -11,6 +11,7 @@ use App\Policies\AdminPolicy;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -66,8 +67,18 @@ class AppServiceProvider extends ServiceProvider
             // Ensure the framework uses the admin guard for the current request
             // while Filament is serving. This prevents `web` users from being
             // treated as authenticated for the admin panel.
+            // try {
+            //     Auth::shouldUse($guard);
+            // } catch (\Throwable $e) {
+            //     // no-op
+            // }
             try {
-                Auth::shouldUse($guard);
+                $path = request()?->path();
+
+                // Don't force admin guard for Livewire core endpoints (upload/update/preview/js)
+                if (! str_starts_with($path ?? '', 'livewire/')) {
+                    Auth::shouldUse($guard);
+                }
             } catch (\Throwable $e) {
                 // no-op
             }
