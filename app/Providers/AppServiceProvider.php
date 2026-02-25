@@ -57,8 +57,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Force root URL to include subfolder path
-        URL::forceRootUrl(config('app.url'));
-
+        // URL::forceRootUrl(config('app.url'));
+    if (!str_starts_with(request()->path(), 'livewire/')) {
+    URL::forceRootUrl(config('app.url'));
+}
         // Register model policy for Admin
         Gate::policy(Admin::class, AdminPolicy::class);
 

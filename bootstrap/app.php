@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->validateCsrfTokens(except: [
-            // 'livewire/upload-file',
+            'livewire/upload-file',
             'livewire/message/*',
         ]);
     })
