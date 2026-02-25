@@ -95,3 +95,18 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::get('/_lw_sigcheck', function () {
+    $url = request()->fullUrl();
+
+    return response()->json([
+        'full_url' => $url,
+        'path' => request()->path(),
+        'query' => request()->query(),
+        'is_secure' => request()->isSecure(),
+        'server_time' => time(),
+        'expires' => (int) request('expires'),
+        'expired' => request('expires') ? (time() > (int) request('expires')) : null,
+        'valid_signature_relative' => request()->hasValidSignature(false),
+        'valid_signature_absolute' => request()->hasValidSignature(true),
+    ]);
+});

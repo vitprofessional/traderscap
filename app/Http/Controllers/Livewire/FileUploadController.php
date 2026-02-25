@@ -2,30 +2,40 @@
 
 namespace App\Http\Controllers\Livewire;
 
+use Illuminate\Support\Facades\URL;
 use Livewire\Features\SupportFileUploads\FileUploadController as BaseFileUploadController;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 
 class FileUploadController extends BaseFileUploadController
 {
     /**
-     * Override Livewire's default upload handler to use relative (non-absolute)
-     * signature validation.
+     * Validate the Livewire upload signature using APP_URL's scheme and host,
+     * not the scheme PHP sees from the server-side request.
      *
-     * The default `hasValidSignature()` (absolute = true) compares the full URL
-     * including scheme and host against the HMAC-signed URL. Behind a reverse
-     * proxy where the server receives HTTP internally but the client uses HTTPS,
-     * the scheme can differ between URL generation time and validation time,
-     * causing a signature mismatch and a spurious 401.
+     * Behind a reverse proxy (e.g. Apache → PHP-FPM without X-Forwarded-Proto)
+     * $request->url() can return "http://" even though the signed URL was
+     * generated with "https://", causing hasValidSignature() to always fail → 401.
      *
-     * Using relative validation (`hasValidSignature(false)`) signs and verifies
-     * only the path + query string, making it immune to scheme/host differences.
+     * We duplicate the request and force the scheme/host from APP_URL so the
+     * HMAC comparison is made against the same URL used at signing time.
      */
     public function handle()
     {
-        abort_unless(request()->hasValidSignature(false), 401);
+        $appParsed = parse_url(config('app.url', ''));
+        $scheme    = $appParsed['scheme'] ?? 'http';
+        $host      = $appParsed['host']   ?? request()->getHost();
+        $port      = $appParsed['port']   ?? null;
+        $httpHost  = $port ? "{$host}:{$port}" : $host;
 
-        $disk = FileUploadConfiguration::disk();
+        // Build a copy of the request whose scheme/host matches APP_URL.
+        $canonicalRequest = request()->duplicate();
+        $canonicalRequest->server->set('HTTPS', $scheme === 'https' ? 'on' : 'off');
+        $canonicalRequest->server->set('HTTP_HOST', $httpHost);
+        $canonicalRequest->headers->set('HOST', $httpHost);
 
+        abort_unless(URL::hasValidSignature($canonicalRequest), 401);
+
+        $disk      = FileUploadConfiguration::disk();
         $filePaths = $this->validateAndStore(request('files'), $disk);
 
         return ['paths' => $filePaths];
