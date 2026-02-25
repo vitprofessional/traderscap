@@ -72,16 +72,7 @@ class AppServiceProvider extends ServiceProvider
             // } catch (\Throwable $e) {
             //     // no-op
             // }
-            try {
-                $path = request()?->path();
 
-                // Don't force admin guard for Livewire core endpoints (upload/update/preview/js)
-                if (! str_starts_with($path ?? '', 'livewire/')) {
-                    Auth::shouldUse($guard);
-                }
-            } catch (\Throwable $e) {
-                // no-op
-            }
 
             // (diagnostic logging removed)
         });
