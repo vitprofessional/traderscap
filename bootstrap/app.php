@@ -11,11 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust proxy (cPanel / SSL)
         $middleware->append(\App\Http\Middleware\TrustProxies::class);
+
+        // Fix Livewire upload abort
         $middleware->validateCsrfTokens(except: [
-        'livewire/upload-file',
-        'livewire/message/*',
-    ]);
+            'livewire/upload-file',
+            'livewire/message/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
