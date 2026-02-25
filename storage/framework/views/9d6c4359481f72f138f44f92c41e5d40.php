@@ -377,7 +377,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     <img src="<?php echo e($this->getAvatarUrl()); ?>" alt="avatar" style="width:100%;height:100%;object-fit:cover;">
                 </div>
 
-                <form wire:submit="updateAvatar" style="display:grid;gap:1rem;">
+                <form wire:submit.prevent="updateAvatar" style="display:grid;gap:1rem;">
                     <div>
                         <?php if (isset($component)) { $__componentOriginal505efd9768415fdb4543e8c564dad437 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal505efd9768415fdb4543e8c564dad437 = $attributes; } ?>

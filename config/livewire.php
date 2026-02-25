@@ -64,7 +64,7 @@ return [
     */
 
     'temporary_file_upload' => [
-        'disk' => 'local',
+        'disk' => 'public',
         'rules' => null,
         'directory' => 'livewire-tmp',
         'middleware' => null,

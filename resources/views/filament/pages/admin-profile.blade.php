@@ -74,7 +74,7 @@
                     <img src="{{ $this->getAvatarUrl() }}" alt="avatar" style="width:100%;height:100%;object-fit:cover;">
                 </div>
 
-                <form wire:submit="updateAvatar" style="display:grid;gap:1rem;">
+                <form wire:submit.prevent="updateAvatar" style="display:grid;gap:1rem;">
                     <div>
                         <x-filament::input.wrapper>
                             <x-filament::input type="file" wire:model="avatar" accept="image/*" />
