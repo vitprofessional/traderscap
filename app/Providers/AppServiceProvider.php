@@ -46,8 +46,11 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        // Force root URL to include subfolder path
-        URL::forceRootUrl(config('app.url'));
+        // Keep CLI URL generation stable, but avoid forcing root URL for web
+        // requests where proxy/host differences can break signed URLs.
+        if ($this->app->runningInConsole()) {
+            URL::forceRootUrl(config('app.url'));
+        }
 
         // Register model policy for Admin
         Gate::policy(Admin::class, AdminPolicy::class);
