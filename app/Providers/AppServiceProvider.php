@@ -23,6 +23,15 @@ class AppServiceProvider extends ServiceProvider
             \Livewire\Mechanisms\HandleRequests\HandleRequests::class,
             \App\Livewire\CustomHandleRequests::class
         );
+
+        // Override Livewire's FileUploadController so that signature validation
+        // uses the relative (path-only) mode.  This prevents 401 errors behind
+        // reverse proxies where the internal scheme (http) differs from the
+        // public scheme (https) used when the signed URL was generated.
+        $this->app->bind(
+            \Livewire\Features\SupportFileUploads\FileUploadController::class,
+            \App\Http\Controllers\Livewire\FileUploadController::class
+        );
     }
 
     /**
@@ -67,11 +76,11 @@ class AppServiceProvider extends ServiceProvider
             // Ensure the framework uses the admin guard for the current request
             // while Filament is serving. This prevents `web` users from being
             // treated as authenticated for the admin panel.
-            // try {
-            //     Auth::shouldUse($guard);
-            // } catch (\Throwable $e) {
-            //     // no-op
-            // }
+            try {
+                Auth::shouldUse($guard);
+            } catch (\Throwable $e) {
+                // no-op
+            }
 
 
             // (diagnostic logging removed)
