@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'sso' => [
+        'shared_key' => env('SSO_SHARED_KEY'),
+        'wordpress_url' => env('WORDPRESS_URL', 'http://localhost/tcap'),
+    ],
+
 ];

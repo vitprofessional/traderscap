@@ -89,7 +89,7 @@
                     </div>
                     <div class="text-sm text-indigo-900">
                         <div class="font-medium"><?php echo e($u->name ?? 'Guest'); ?></div>
-                        <form method="POST" action="<?php echo e(route('logout')); ?>">
+                        <form method="POST" action="<?php echo e(route('customerLogout')); ?>">
                             <?php echo csrf_field(); ?>
                             <button type="submit" class="text-xs text-indigo-700 hover:underline">Logout</button>
                         </form>

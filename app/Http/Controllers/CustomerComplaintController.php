@@ -94,5 +94,36 @@ class CustomerComplaintController extends Controller
         $ticket->save();
 
         return redirect()->route('complaints.show',$ticket)->with('success','Reply sent.');
+
+    }
+
+    public function close(Request $request, Ticket $ticket)
+    {
+        $user = $request->user();
+        if ($ticket->user_id && (! $user || $ticket->user_id !== $user->id)) {
+            abort(403);
+        }
+
+        $ticket->status = 'closed';
+        $ticket->save();
+
+        return redirect()->route('complaints.show', $ticket)->with('success', 'Ticket closed successfully.');
+    }
+
+    public function updatePriority(Request $request, Ticket $ticket)
+    {
+        $user = $request->user();
+        if ($ticket->user_id && (! $user || $ticket->user_id !== $user->id)) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'priority' => 'required|in:low,normal,high'
+        ]);
+
+        $ticket->priority = $data['priority'];
+        $ticket->save();
+
+        return redirect()->route('complaints.show', $ticket)->with('success', 'Priority updated successfully.');
     }
 }

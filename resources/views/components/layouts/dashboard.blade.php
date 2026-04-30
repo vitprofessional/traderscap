@@ -80,7 +80,7 @@
                     </div>
                     <div class="text-sm text-indigo-900">
                         <div class="font-medium">{{ $u->name ?? 'Guest' }}</div>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('customerLogout') }}">
                             @csrf
                             <button type="submit" class="text-xs text-indigo-700 hover:underline">Logout</button>
                         </form>

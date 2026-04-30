@@ -28,10 +28,6 @@ Route::post('/sso/forgot-password', [SsoPasswordController::class, 'forgotPasswo
     ->middleware(['guest', 'verify.sso'])
     ->name('sso.forgot-password');
 
-Route::get('/reset-password/{token}', [SsoPasswordController::class, 'showResetPage'])
-    ->middleware('guest')
-    ->name('password.reset');
-
 Route::post('/sso/reset-password', [SsoPasswordController::class, 'resetPassword'])
     ->middleware(['guest', 'verify.sso'])
     ->name('sso.reset-password');
@@ -40,20 +36,6 @@ Route::post('/customer-logout', [CustomerAuthController::class, 'customerLogout'
     ->middleware(['auth'])
     ->name('customerLogout');
 // wordpress+laravel login system releated part ends
-
-//wordpress broker finder route
-use App\Http\Controllers\BrokerFinderApiController;
-Route::prefix('api/broker-finder')->group(function () {
-    Route::get('/questions', [BrokerFinderApiController::class, 'questions'])
-        ->name('broker-finder.api.questions');
-
-    Route::post('/match', [BrokerFinderApiController::class, 'match'])
-        ->name('broker-finder.api.match');
-
-    Route::get('/recommendations', [BrokerFinderApiController::class, 'recommendations'])
-        ->name('broker-finder.api.recommendations');
-});
-// End of WordPress broker finder routes
 
 
 Route::get('/', function () {
@@ -141,8 +123,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/complaints', [\App\Http\Controllers\CustomerComplaintController::class,'store'])->name('complaints.store');
     Route::get('/complaints/{ticket}', [\App\Http\Controllers\CustomerComplaintController::class,'show'])->name('complaints.show');
     Route::post('/complaints/{ticket}/reply', [\App\Http\Controllers\CustomerComplaintController::class,'reply'])->name('complaints.reply');
-    Route::post('/complaints/{ticket}/close', [\App\Http\Controllers\CustomerComplaintController::class,'close'])->name('complaints.close');
-    Route::post('/complaints/{ticket}/update-priority', [\App\Http\Controllers\CustomerComplaintController::class,'updatePriority'])->name('complaints.update-priority');
 });
 
 

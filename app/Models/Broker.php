@@ -28,7 +28,6 @@ class Broker extends Model
         'features' => 'array',
         'pros' => 'array',
         'cons' => 'array',
-        'rating' => 'float',
         'is_active' => 'boolean',
     ];
 

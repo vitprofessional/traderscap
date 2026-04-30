@@ -20,6 +20,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'livewire/upload-file',
             'livewire/message/*',
+            'sso/login-request',
+            'sso/register-request',
+            'sso/forgot-password',
+            'sso/reset-password',
+            'api/broker-finder/match',
+            'api/broker-finder/questions',
+            'api/broker-finder/recommendations',
+        ]);
+
+        $middleware->alias([
+            'verify.sso' => \App\Http\Middleware\VerifySsoRequest::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

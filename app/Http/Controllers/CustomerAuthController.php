@@ -29,4 +29,19 @@ class CustomerAuthController extends Controller
             'email' => 'The provided credentials do not match our records.',
         ])->withInput();
     }
+
+    public function customerLogout(Request $request)
+    {
+        // Laravel logout
+        Auth::logout();
+
+        // Session destroy
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect to WordPress login page
+        $wordpressUrl = rtrim(config('services.sso.wordpress_url'), '/');
+
+        return redirect($wordpressUrl . '/customer-login/');
+    }
 }
