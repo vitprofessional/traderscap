@@ -1,23 +1,23 @@
 <x-layouts.dashboard>
-    <div class="max-w-7xl w-full space-y-6">
-        <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="mx-auto w-full max-w-6xl space-y-8 px-2 sm:px-4 lg:px-6">
+        <!-- Header Section -->
+        <section class="rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm md:px-8">
+            <div class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-semibold text-gray-900">Find Your Best Broker</h2>
-                    <p class="text-gray-600 mt-1">Browse the top brokers or use custom matching based on your profile.</p>
+                    <h1 class="text-3xl font-bold text-slate-900">Find Your Best Broker</h1>
+                    <p class="mt-2 text-sm text-slate-600">Browse top brokers or use custom matching based on your trading profile.</p>
                 </div>
-
-                <a href="{{ route('custom-best-broker') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('custom-best-broker') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-all hover:bg-cyan-700 active:scale-95">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
-                    <span>Custom Best Broker</span>
+                    <span>Custom Match</span>
                 </a>
             </div>
-        </div>
+        </section>
 
         <!-- Broker Results -->
-        <div class="space-y-6">
+        <div>
             @livewire('broker-recommendations')
         </div>
     </div>

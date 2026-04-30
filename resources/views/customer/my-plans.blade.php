@@ -1,140 +1,173 @@
 <x-layouts.dashboard>
-    <div class="max-w-6xl w-full">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-2xl font-semibold">My Plans</h2>
-                <p class="text-sm text-gray-600">Track your subscriptions, expiry dates, and manage plan actions.</p>
+    <div class="mx-auto w-full max-w-6xl space-y-8 px-2 sm:px-4 lg:px-6">
+        <!-- Header Section -->
+        <section class="rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm md:px-8">
+            <div class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">My Plans</h1>
+                    <p class="mt-2 text-sm text-slate-600">Track your subscriptions, expiry dates, and manage plan actions.</p>
+                </div>
+                <a href="{{ route('investment-plans') }}" class="inline-flex items-center justify-center rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-all hover:bg-cyan-700 active:scale-95">
+                    Browse Plans
+                </a>
             </div>
-            <a href="{{ route('investment-plans') }}" class="inline-flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700">Browse Plans</a>
-        </div>
+        </section>
 
         @if(session('success'))
-            <div class="mb-4 p-3 bg-green-50 text-green-800 rounded">{{ session('success') }}</div>
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <svg class="h-5 w-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm font-semibold text-emerald-800">{{ session('success') }}</p>
+                </div>
+            </div>
         @endif
 
         @if(!$userPackage)
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <p class="text-sm text-gray-600">You have no plan yet. Start by purchasing a package.</p>
-            </div>
+            <section class="rounded-2xl border border-slate-200 bg-white px-6 py-12 shadow-sm text-center md:px-8">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                    <svg class="h-8 w-8 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-sm text-slate-600">You have no active plan yet. Start by purchasing a package.</p>
+                <a href="{{ route('investment-plans') }}" class="mt-6 inline-flex items-center justify-center rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-all hover:bg-cyan-700 active:scale-95">
+                    Browse Plans
+                </a>
+            </section>
         @else
             <!-- Current Plan Details Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-                <h3 class="text-xl font-semibold text-gray-900 mb-6">Current Plan Details</h3>
+            <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-200 px-6 py-6 md:px-8">
+                    <h2 class="text-lg font-semibold text-slate-900">Current Plan Details</h2>
+                </div>
+                <div class="px-6 py-8 md:px-8">
+                    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                        <!-- Left Column: Plan & Dates -->
+                        <div class="space-y-8">
+                            <!-- Package Name -->
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Package Name</p>
+                                <p class="text-3xl font-bold text-slate-900">{{ $userPackage->package->name ?? 'N/A' }}</p>
+                            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Left Column: Plan & Dates -->
-                    <div>
-                        <div class="mb-8">
-                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Package Name</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $userPackage->package->name ?? 'N/A' }}</p>
+                            <!-- Included Features -->
+                            @if(!empty($userPackage->package?->facilities) && is_array($userPackage->package->facilities))
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-3">Included Features</p>
+                                    <ul class="space-y-2">
+                                        @foreach($userPackage->package->facilities as $facility)
+                                            <li class="flex items-start gap-3">
+                                                <svg class="h-5 w-5 flex-shrink-0 text-emerald-600 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span class="text-sm text-slate-700">{{ $facility }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <!-- Dates -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Start Date</p>
+                                    <p class="text-lg font-semibold text-slate-900">{{ $userPackage->starts_at ? $userPackage->starts_at->format('M d, Y') : 'Pending' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">End Date</p>
+                                    <p class="text-lg font-semibold text-slate-900">{{ $userPackage->ends_at ? $userPackage->ends_at->format('M d, Y') : 'N/A' }}</p>
+                                </div>
+                            </div>
                         </div>
 
-                        @if(!empty($userPackage->package?->facilities) && is_array($userPackage->package->facilities))
-                            <div class="mb-8">
-                                <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Included Features</p>
-                                <ul class="text-sm text-gray-700 space-y-1">
-                                    @foreach($userPackage->package->facilities as $facility)
-                                        <li class="flex items-start">
-                                            <span class="text-green-600 mr-2">✓</span>
-                                            <span>{{ $facility }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <div class="grid grid-cols-2 gap-4">
+                        <!-- Right Column: Status, Equity & Broker Info -->
+                        <div class="space-y-8">
+                            <!-- Status -->
                             <div>
-                                <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Start Date</p>
-                                <p class="text-lg font-semibold text-gray-900">{{ $userPackage->starts_at ? $userPackage->starts_at->toFormattedDateString() : 'Pending' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">End Date</p>
-                                <p class="text-lg font-semibold text-gray-900">{{ $userPackage->ends_at ? $userPackage->ends_at->toFormattedDateString() : 'N/A' }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Status, Equity & Trading Info -->
-                    <div>
-                        <div class="mb-8">
-                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Status</p>
-                            <div>
-                                <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold
-                                    @if($userPackage->status === 'active') bg-green-100 text-green-700
-                                    @elseif($userPackage->status === 'expired') bg-red-100 text-red-700
-                                    @else bg-amber-100 text-amber-700 @endif">
+                                <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-3">Status</p>
+                                <span class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em]
+                                    @if($userPackage->status === 'active') bg-emerald-100 text-emerald-800
+                                    @elseif($userPackage->status === 'expired') bg-rose-100 text-rose-800
+                                    @else bg-amber-100 text-amber-800 @endif">
                                     {{ ucfirst(str_replace('_', ' ', $userPackage->status)) }}
                                 </span>
                             </div>
-                        </div>
 
-                        <div class="mb-8">
-                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Account Equity</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $userPackage->equity ? '$' . number_format($userPackage->equity, 2) : 'N/A' }}</p>
-                        </div>
+                            <!-- Account Equity -->
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Account Equity</p>
+                                <p class="text-3xl font-bold text-cyan-700">{{ $userPackage->equity ? '$' . number_format($userPackage->equity, 2) : 'N/A' }}</p>
+                            </div>
 
-                        <div>
-                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500 mb-2">Broker Details</p>
-                            <div class="text-sm text-gray-700 space-y-1">
-                                <p><span class="font-semibold">Broker:</span> {{ $userPackage->broker_name ?? 'N/A' }}</p>
-                                <p><span class="font-semibold">Trading ID:</span> {{ $userPackage->trading_id ?? 'N/A' }}</p>
-                                <p><span class="font-semibold">Server:</span> {{ $userPackage->trading_server ?? 'N/A' }}</p>
+                            <!-- Broker Details -->
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-3">Broker Details</p>
+                                <div class="space-y-2 text-sm">
+                                    <p class="text-slate-700"><span class="font-semibold text-slate-900">Broker:</span> {{ $userPackage->broker_name ?? 'N/A' }}</p>
+                                    <p class="text-slate-700"><span class="font-semibold text-slate-900">Trading ID:</span> {{ $userPackage->trading_id ?? 'N/A' }}</p>
+                                    <p class="text-slate-700"><span class="font-semibold text-slate-900">Server:</span> {{ $userPackage->trading_server ?? 'N/A' }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Actions Table -->
+            <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <div class="border-b border-slate-200 px-6 py-6 md:px-8">
+                    <h2 class="text-lg font-semibold text-slate-900">Plan Actions</h2>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table class="w-full text-sm">
                         <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200 text-gray-700">
-                                <th class="py-3 px-4 font-semibold">Package</th>
-                                <th class="py-3 px-4 font-semibold">Starts</th>
-                                <th class="py-3 px-4 font-semibold">Ends</th>
-                                <th class="py-3 px-4 font-semibold">Status</th>
-                                <th class="py-3 px-4 font-semibold text-right">Actions</th>
+                            <tr class="border-b border-slate-200 bg-slate-50">
+                                <th class="px-6 py-4 text-left font-semibold text-slate-700">Package</th>
+                                <th class="px-6 py-4 text-left font-semibold text-slate-700">Starts</th>
+                                <th class="px-6 py-4 text-left font-semibold text-slate-700">Ends</th>
+                                <th class="px-6 py-4 text-left font-semibold text-slate-700">Status</th>
+                                <th class="px-6 py-4 text-right font-semibold text-slate-700">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b border-gray-100 align-top hover:bg-gray-50/60">
-                                <td class="py-4 px-4 min-w-[220px]">
-                                    <div class="font-semibold text-gray-900">{{ $userPackage->package->name ?? '—' }}</div>
+                            <tr class="border-b border-slate-200 transition-colors hover:bg-slate-50">
+                                <td class="px-6 py-4">
+                                    <div class="font-semibold text-slate-900">{{ $userPackage->package->name ?? '—' }}</div>
                                     @if(!empty($userPackage->package?->facilities) && is_array($userPackage->package->facilities))
-                                        <div class="mt-1 text-xs text-gray-600 leading-relaxed">
+                                        <div class="mt-1 text-xs text-slate-600">
                                             {{ implode(' • ', $userPackage->package->facilities) }}
                                         </div>
                                     @endif
                                 </td>
-                                <td class="py-4 px-4 whitespace-nowrap text-gray-700">{{ $userPackage->starts_at ? $userPackage->starts_at->toFormattedDateString() : '—' }}</td>
-                                <td class="py-4 px-4 whitespace-nowrap text-gray-700">{{ $userPackage->ends_at ? $userPackage->ends_at->toFormattedDateString() : '—' }}</td>
-                                <td class="py-4 px-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium
-                                        @if($userPackage->status === 'active') bg-green-100 text-green-700
-                                        @elseif($userPackage->status === 'expired') bg-red-100 text-red-700
-                                        @else bg-amber-100 text-amber-700 @endif">
+                                <td class="px-6 py-4 text-slate-600">{{ $userPackage->starts_at ? $userPackage->starts_at->format('M d, Y') : '—' }}</td>
+                                <td class="px-6 py-4 text-slate-600">{{ $userPackage->ends_at ? $userPackage->ends_at->format('M d, Y') : '—' }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em]
+                                        @if($userPackage->status === 'active') bg-emerald-100 text-emerald-800
+                                        @elseif($userPackage->status === 'expired') bg-rose-100 text-rose-800
+                                        @else bg-amber-100 text-amber-800 @endif">
                                         {{ ucfirst($userPackage->status) }}
                                     </span>
                                 </td>
-                                <td class="py-4 px-4 text-right whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-2">
-                                        <a href="{{ route('investment-plans') }}" class="inline-flex items-center px-3 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('investment-plans') }}" class="inline-flex items-center rounded-full bg-cyan-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-all hover:bg-cyan-700 active:scale-95">
                                             Change Plan
                                         </a>
 
                                         @if($userPackage->status !== 'expired')
-                                            <form method="POST" action="{{ route('my-plans.cancel', $userPackage) }}" class="inline">
+                                            <form method="POST" action="{{ route('my-plans.cancel', $userPackage) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this plan?');">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-2 text-xs font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Cancel</button>
+                                                <button type="submit" class="inline-flex items-center rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-all hover:bg-rose-700 active:scale-95">Cancel</button>
                                             </form>
                                         @endif
 
                                         @if($userPackage->status === 'expired')
                                             <form method="POST" action="{{ route('my-plans.renew', $userPackage) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-2 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Renew</button>
+                                                <button type="submit" class="inline-flex items-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-all hover:bg-emerald-700 active:scale-95">Renew</button>
                                             </form>
                                         @endif
                                     </div>
@@ -143,7 +176,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
         @endif
     </div>
 </x-layouts.dashboard>
