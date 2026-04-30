@@ -9,12 +9,13 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Support\Icons\Heroicon;
 
 class UserResource extends Resource
 {
@@ -29,30 +30,82 @@ class UserResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components([
-            TextInput::make('name')->required()->maxLength(255),
-            TextInput::make('email')->email()->required()->unique(ignoreRecord: true),
-            TextInput::make('password')->password()->required()->minLength(8),
-            Select::make('status')
-                ->options([
-                    'registered' => 'Registered',
-                    'pending' => 'Pending Verify',
-                    'active' => 'Active',
-                    'expired' => 'Expired',
-                ])
-                ->default('registered')
-                ->required(),
-        ]);
+        return $schema
+            ->columns(['default' => 1, 'lg' => 3])
+            ->components([
+                Section::make('Customer profile')
+                    ->icon('heroicon-o-user')
+                    ->description('The customer\'s display name and login credentials.')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Full name')
+                            ->placeholder('John Doe')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        TextInput::make('email')
+                            ->label('Email address')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->columnSpanFull(),
+                        TextInput::make('password')
+                            ->label('Password')
+                            ->password()
+                            ->required()
+                            ->minLength(8)
+                            ->helperText('Minimum 8 characters.')
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpan(['default' => 1, 'lg' => 2]),
+                Section::make('Account status')
+                    ->icon('heroicon-o-signal')
+                    ->description('Current lifecycle state of this account.')
+                    ->schema([
+                        Select::make('status')
+                            ->options([
+                                'registered' => 'Registered',
+                                'pending' => 'Pending Verify',
+                                'active' => 'Active',
+                                'expired' => 'Expired',
+                            ])
+                            ->default('registered')
+                            ->required()
+                            ->helperText('Controls what the customer can access.')
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpan(['default' => 1, 'lg' => 1]),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('name')->searchable()->sortable(),
-            TextColumn::make('email')->searchable()->sortable(),
-            TextColumn::make('status')->sortable(),
-            TextColumn::make('created_at')->dateTime()->sortable(),
+            TextColumn::make('name')
+                ->searchable()
+                ->sortable()
+                ->weight('medium')
+                ->description(fn ($record) => $record->email),
+            TextColumn::make('email')
+                ->searchable()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('status')
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'active' => 'success',
+                    'expired' => 'danger',
+                    'pending' => 'warning',
+                    'registered' => 'gray',
+                    default => 'gray',
+                })
+                ->sortable(),
+            TextColumn::make('created_at')
+                ->label('Registered')
+                ->dateTime('M d, Y')
+                ->sortable(),
         ])
+        ->defaultSort('created_at', 'desc')
         ->filters([
             SelectFilter::make('status')
                 ->options([
@@ -68,6 +121,7 @@ class UserResource extends Resource
             \Filament\Actions\DeleteAction::make(),
             Action::make('changeStatus')
                 ->label('Change Status')
+                ->icon('heroicon-m-arrows-right-left')
                 ->form([
                     Select::make('status')
                         ->options([
@@ -83,9 +137,9 @@ class UserResource extends Resource
                     $record->save();
                 }),
         ])
-        ->toolbarActions([
-            \Filament\Actions\CreateAction::make(),
-        ]);
+        ->emptyStateHeading('No customers yet')
+        ->emptyStateDescription('Add the first customer account manually or wait for registrations.')
+        ->emptyStateIcon('heroicon-o-users');
     }
 
     public static function getRelations(): array

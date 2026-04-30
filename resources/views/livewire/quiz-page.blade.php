@@ -1,288 +1,790 @@
 @php
     $isEmbedded = $embedded ?? false;
+    $questionNumber = ($currentQuestion ?? 0) + 1;
+    $progress = $totalQuestions > 0 ? round(($questionNumber / $totalQuestions) * 100) : 0;
 @endphp
 
-<div class="{{ $isEmbedded ? '' : 'min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100' }}">
-@if (!$isEmbedded)
-    <!-- Top Menu Bar -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{{ url('/') }}" class="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">TradersCap</a>
-            <div class="space-x-4">
-                <a href="{{ url('/') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Customer Panel</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
-@endif
+<div class="quiz-shell {{ $isEmbedded ? 'quiz-shell--embedded' : '' }}">
+    <style>
+        .quiz-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(251, 191, 36, 0.18), transparent 24%),
+                radial-gradient(circle at right top, rgba(59, 130, 246, 0.12), transparent 20%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+            color: #0f172a;
+        }
 
-    <div class="{{ $isEmbedded ? '' : 'py-12 px-4' }}">
-        <div class="{{ $isEmbedded ? '' : 'max-w-4xl mx-auto' }}">
-            <div class="bg-white rounded-lg shadow-xl p-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">Find My Best Broker</h1>
-                <p class="text-gray-600 mb-8">Discover the perfect forex broker for your trading needs</p>
+        .quiz-shell--embedded {
+            min-height: auto;
+            background: transparent;
+        }
 
-            @if (!$submitted)
+        .quiz-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.96);
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+        }
+
+        .quiz-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .quiz-brand__mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.85rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a;
+            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.22);
+        }
+
+        .quiz-topbar__links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quiz-topbar__link {
+            color: rgba(226, 232, 240, 0.82);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 150ms ease;
+        }
+
+        .quiz-topbar__link:hover {
+            color: #fff;
+        }
+
+        .quiz-viewport {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 2rem;
+        }
+
+        .quiz-hero {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.45rem 0.8rem;
+            font-size: 0.85rem;
+            color: #475569;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .quiz-hero__eyebrow-dot {
+            width: 0.45rem;
+            height: 0.45rem;
+            border-radius: 999px;
+            background: #fbbf24;
+        }
+
+        .quiz-hero__title {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #0f172a;
+        }
+
+        .quiz-hero__subtitle {
+            max-width: 52rem;
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .quiz-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .quiz-panel,
+        .quiz-summary,
+        .quiz-results,
+        .quiz-empty {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 1.5rem;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+            backdrop-filter: blur(12px);
+        }
+
+        .quiz-panel {
+            padding: 1.25rem;
+        }
+
+        .quiz-summary {
+            padding: 1rem;
+        }
+
+        .quiz-panel__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-panel__title {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .quiz-panel__text {
+            margin: 0.35rem 0 0;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #64748b;
+        }
+
+        .quiz-step {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+
+        .quiz-progress {
+            margin: 1rem 0 1.5rem;
+        }
+
+        .quiz-progress__meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.55rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .quiz-progress__bar {
+            height: 0.75rem;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #e2e8f0;
+        }
+
+        .quiz-progress__fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 45%, #2563eb 100%);
+            transition: width 220ms ease;
+        }
+
+        .quiz-question {
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-question__title {
+            margin: 0 0 0.6rem;
+            font-size: clamp(1.4rem, 2vw, 1.9rem);
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .quiz-question__description {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #64748b;
+        }
+
+        .quiz-answer-list {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .quiz-answer-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 1.1rem;
+            background: #fff;
+            padding: 1rem 1.05rem;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+        }
+
+        .quiz-answer-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(251, 191, 36, 0.38);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+            background: rgba(255, 251, 235, 0.88);
+        }
+
+        .quiz-answer-card.is-selected {
+            border-color: rgba(37, 99, 235, 0.45);
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.9), rgba(255, 255, 255, 1));
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.08);
+        }
+
+        .quiz-answer-card__radio {
+            margin-top: 0.15rem;
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+            accent-color: #1d4ed8;
+        }
+
+        .quiz-answer-card__body {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .quiz-answer-card__title {
+            margin: 0;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .quiz-answer-card__description {
+            margin: 0.3rem 0 0;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: #64748b;
+        }
+
+        .quiz-answer-select {
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 1rem;
+            background: #fff;
+            padding: 0.95rem 1rem;
+            font-size: 0.95rem;
+            color: #0f172a;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .quiz-answer-select:focus {
+            outline: none;
+            border-color: rgba(37, 99, 235, 0.45);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.35rem;
+        }
+
+        .quiz-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.85rem 1.15rem;
+            font-size: 0.92rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, opacity 150ms ease;
+        }
+
+        .quiz-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .quiz-button--ghost {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .quiz-button--primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            box-shadow: 0 14px 26px rgba(37, 99, 235, 0.18);
+        }
+
+        .quiz-button--success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+            box-shadow: 0 14px 26px rgba(22, 163, 74, 0.18);
+        }
+
+        .quiz-button[disabled] {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-aside {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .quiz-summary__title,
+        .quiz-results__title,
+        .quiz-empty__title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .quiz-summary__list,
+        .quiz-results__list {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .quiz-summary__item,
+        .quiz-results__item {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 1rem;
+            background: #f8fafc;
+            padding: 0.9rem 1rem;
+        }
+
+        .quiz-summary__item-top,
+        .quiz-results__item-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .quiz-summary__item-label,
+        .quiz-results__item-label {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .quiz-summary__item-value,
+        .quiz-results__item-value {
+            margin: 0.3rem 0 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .quiz-results__score {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #1d4ed8;
+        }
+
+        .quiz-results__meta {
+            margin: 0.45rem 0 0;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .quiz-results__details {
+            display: grid;
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .quiz-results__two-col {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .quiz-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.9rem;
+        }
+
+        .quiz-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-badge--success {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+        }
+
+        .quiz-badge--danger {
+            background: rgba(244, 63, 94, 0.12);
+            color: #be123c;
+        }
+
+        .quiz-empty {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .quiz-empty__text {
+            margin: 0.5rem 0 0;
+            color: #64748b;
+        }
+
+        .quiz-results__website {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            border-radius: 999px;
+            background: #2563eb;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .quiz-results__website:hover {
+            background: #1d4ed8;
+        }
+
+        @media (min-width: 1024px) {
+            .quiz-grid {
+                grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+                align-items: start;
+            }
+
+            .quiz-results__two-col {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+
+    <div class="{{ $isEmbedded ? '' : 'quiz-shell--page' }}">
+        @if (! $isEmbedded)
+            <nav class="quiz-topbar">
+                <a href="{{ url('/') }}" class="quiz-brand">
+                    <span class="quiz-brand__mark">TC</span>
+                    <span>Traderscap</span>
+                </a>
+                <div class="quiz-topbar__links">
+                    <a href="{{ url('/') }}" class="quiz-topbar__link">Home</a>
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="quiz-topbar__link">Customer Panel</a>
+                    @endauth
+                </div>
+            </nav>
+        @endif
+
+        <div class="quiz-viewport {{ $isEmbedded ? '' : 'quiz-viewport--page' }}">
+            <section class="quiz-hero">
+                <span class="quiz-hero__eyebrow"><span class="quiz-hero__eyebrow-dot"></span>Broker matching quiz</span>
+                <h1 class="quiz-hero__title">Find the best broker for your trading profile</h1>
+                <p class="quiz-hero__subtitle">
+                    Answer a few structured questions and get a cleaner shortlist based on compatibility, regulation, and trading preferences.
+                </p>
+            </section>
+
+            @if (! $submitted)
                 @if ($totalQuestions > 0)
-                    <!-- Progress Bar -->
-                    <div class="mb-8">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-700">Question {{ $currentQuestion + 1 }} of {{ $totalQuestions }}</span>
-                            <span class="text-sm font-medium text-indigo-600">{{ round(($currentQuestion + 1) / $totalQuestions * 100) }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: {{ ($currentQuestion + 1) / $totalQuestions * 100 }}%"></div>
-                        </div>
-                    </div>
+                    <div class="quiz-grid">
+                        <section class="quiz-panel">
+                            <div class="quiz-panel__header">
+                                <div>
+                                    <p class="quiz-step">Question {{ $questionNumber }} of {{ $totalQuestions }}</p>
+                                    <h2 class="quiz-panel__title" style="margin-top:0.85rem;">Choose one answer that best fits you</h2>
+                                    <p class="quiz-panel__text">Your selections update the match suggestions as you move through the quiz.</p>
+                                </div>
+                            </div>
 
-                    <!-- Question -->
-                    @php
-                        $question = $questions[$currentQuestion];
-                        $selectedAnswer = $answers[$currentQuestion] ?? null;
-                    @endphp
+                            <div class="quiz-progress">
+                                <div class="quiz-progress__meta">
+                                    <span>Progress</span>
+                                    <span>{{ $progress }}%</span>
+                                </div>
+                                <div class="quiz-progress__bar">
+                                    <div class="quiz-progress__fill" style="width: {{ $progress }}%;"></div>
+                                </div>
+                            </div>
 
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-semibold text-gray-900 mb-6">{{ $question->title }}</h2>
-                        @if ($question->description)
-                            <p class="text-gray-600 mb-4">{{ $question->description }}</p>
-                        @endif
+                            @php
+                                $question = $questions[$currentQuestion];
+                                $selectedAnswer = $answers[$currentQuestion] ?? null;
+                            @endphp
 
-                        <!-- Answers -->
-                        @if (count($question->answers) > 5)
-                            <!-- Dropdown for more than 5 answers -->
-                            <div class="mb-4">
-                                <select 
+                            <div class="quiz-question">
+                                <h3 class="quiz-question__title">{{ $question->title }}</h3>
+                                @if ($question->description)
+                                    <p class="quiz-question__description">{{ $question->description }}</p>
+                                @endif
+                            </div>
+
+                            @if (count($question->answers) > 5)
+                                <select
                                     wire:change="selectAnswer($event.target.value)"
-                                    class="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none text-base"
+                                    class="quiz-answer-select"
                                 >
                                     <option value="">Select an answer...</option>
                                     @foreach ($question->answers as $answer)
                                         <option value="{{ $answer->id }}" {{ (int) $selectedAnswer === (int) $answer->id ? 'selected' : '' }}>
-                                            {{ $answer->text }}@if($answer->description) - {{ $answer->description }}@endif
+                                            {{ $answer->text }}@if ($answer->description) - {{ $answer->description }}@endif
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
-                        @else
-                            <!-- Radio buttons for 5 or fewer answers -->
-                            <div class="space-y-3">
-                                @forelse ($question->answers as $answer)
-                                    <button type="button"
-                                        wire:key="question-{{ $question->id }}-answer-{{ $answer->id }}"
-                                        wire:click="selectAnswer({{ $answer->id }})"
-                                        class="w-full text-left flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors {{ (int) $selectedAnswer === (int) $answer->id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300' }}">
-                                        <input type="radio" name="answer" value="{{ $answer->id }}"
-                                            {{ (int) $selectedAnswer === (int) $answer->id ? 'checked' : '' }}
-                                            class="w-4 h-4 text-indigo-600 pointer-events-none">
-                                        <div class="ml-4 flex-1">
-                                            <p class="font-medium text-gray-900">{{ $answer->text }}</p>
-                                            @if ($answer->description)
-                                                <p class="text-sm text-gray-500">{{ $answer->description }}</p>
-                                            @endif
-                                        </div>
-                                    </button>
-                                @empty
-                                    <p class="text-red-600">No answers loaded for this question</p>
-                                @endforelse
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Live Broker Recommendations -->
-                    @php
-                        $liveResults = $this->getLiveResults();
-                    @endphp
-
-                    @if (count($liveResults) > 0)
-                        <div class="mb-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Top Matching Brokers So Far</h3>
-                            <div class="space-y-3">
-                                @foreach ($liveResults as $index => $result)
-                                    @php
-                                        $broker = $result['broker'];
-                                        $score = $result['score'];
-                                    @endphp
-                                    <div class="bg-white rounded-lg p-3 flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <span class="text-lg font-bold text-indigo-600">#{{ $index + 1 }}</span>
-                                            @if ($broker->logo)
-                                                <img src="{{ asset('storage/app/public/' . $broker->logo) }}" alt="{{ $broker->name }}" class="h-12 w-12 object-contain rounded" onerror="this.style.display='none'">
-                                            @endif
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $broker->name }}</p>
-                                                @if ($broker->regulation)
-                                                    <p class="text-xs text-gray-500">{{ $broker->regulation }}</p>
+                            @else
+                                <div class="quiz-answer-list">
+                                    @forelse ($question->answers as $answer)
+                                        <button
+                                            type="button"
+                                            wire:key="question-{{ $question->id }}-answer-{{ $answer->id }}"
+                                            wire:click="selectAnswer({{ $answer->id }})"
+                                            class="quiz-answer-card {{ (int) $selectedAnswer === (int) $answer->id ? 'is-selected' : '' }}"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="answer"
+                                                value="{{ $answer->id }}"
+                                                {{ (int) $selectedAnswer === (int) $answer->id ? 'checked' : '' }}
+                                                class="quiz-answer-card__radio"
+                                            >
+                                            <div class="quiz-answer-card__body">
+                                                <p class="quiz-answer-card__title">{{ $answer->text }}</p>
+                                                @if ($answer->description)
+                                                    <p class="quiz-answer-card__description">{{ $answer->description }}</p>
                                                 @endif
                                             </div>
+                                        </button>
+                                    @empty
+                                        <div class="quiz-empty" style="padding:1rem;">
+                                            <p class="quiz-empty__title">No answers loaded for this question</p>
                                         </div>
-                                        <div class="text-right">
-                                            <div class="text-sm text-gray-600">Score</div>
-                                            <div class="text-lg font-bold text-indigo-600">{{ $score }}</div>
+                                    @endforelse
+                                </div>
+                            @endif
+
+                            <div class="quiz-actions">
+                                <button
+                                    wire:click="previousQuestion"
+                                    {{ $currentQuestion === 0 ? 'disabled' : '' }}
+                                    class="quiz-button quiz-button--ghost"
+                                >
+                                    Previous
+                                </button>
+
+                                @if ($currentQuestion < $totalQuestions - 1)
+                                    <button
+                                        wire:click="nextQuestion"
+                                        {{ empty($selectedAnswer) ? 'disabled' : '' }}
+                                        class="quiz-button quiz-button--primary"
+                                    >
+                                        Next question
+                                    </button>
+                                @else
+                                    <button
+                                        wire:click="submitQuiz"
+                                        {{ empty($selectedAnswer) ? 'disabled' : '' }}
+                                        class="quiz-button quiz-button--success"
+                                    >
+                                        Find my brokers
+                                    </button>
+                                @endif
+                            </div>
+                        </section>
+
+                        <aside class="quiz-aside">
+                            @php
+                                $liveResults = $this->getLiveResults();
+                            @endphp
+
+                            <section class="quiz-summary">
+                                <h3 class="quiz-summary__title">Live match preview</h3>
+                                <div class="quiz-summary__list">
+                                    <div class="quiz-summary__item">
+                                        <div class="quiz-summary__item-top">
+                                            <div>
+                                                <p class="quiz-summary__item-label">Open tickets</p>
+                                                <p class="quiz-summary__item-value">{{ count($liveResults) > 0 ? 'Updating' : 'Waiting for answers' }}</p>
+                                            </div>
+                                            <span class="quiz-badge quiz-badge--success">Live</span>
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
-                            <p class="text-xs text-gray-500 mt-3">💡 Recommendations update as you answer more questions</p>
-                        </div>
-                    @endif
+                                    <div class="quiz-summary__item">
+                                        <div class="quiz-summary__item-top">
+                                            <div>
+                                                <p class="quiz-summary__item-label">Question focus</p>
+                                                <p class="quiz-summary__item-value">{{ $question->title }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
 
-                    <!-- Navigation Buttons -->
-                    <div class="flex justify-between gap-4">
-                        <button wire:click="previousQuestion"
-                            {{ $currentQuestion === 0 ? 'disabled' : '' }}
-                            class="px-6 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            ← Previous
-                        </button>
-
-                        @if ($currentQuestion < $totalQuestions - 1)
-                            <button wire:click="nextQuestion"
-                                {{ empty($selectedAnswer) ? 'disabled' : '' }}
-                                class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                Next →
-                            </button>
-                        @else
-                            <button wire:click="submitQuiz"
-                                {{ empty($selectedAnswer) ? 'disabled' : '' }}
-                                class="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                Find My Brokers →
-                            </button>
-                        @endif
+                            <section class="quiz-results">
+                                <h3 class="quiz-results__title">Top matching brokers so far</h3>
+                                @if (count($liveResults) > 0)
+                                    <div class="quiz-results__list">
+                                        @foreach ($liveResults as $index => $result)
+                                            @php
+                                                $broker = $result['broker'];
+                                                $score = $result['score'];
+                                            @endphp
+                                            <div class="quiz-results__item">
+                                                <div class="quiz-results__item-top">
+                                                    <div>
+                                                        <p class="quiz-results__item-label">#{{ $index + 1 }} {{ $broker->name }}</p>
+                                                        @if ($broker->regulation)
+                                                            <p class="quiz-results__meta">{{ $broker->regulation }}</p>
+                                                        @endif
+                                                    </div>
+                                                    <div class="quiz-results__score">{{ $score }}</div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <p class="quiz-panel__text" style="margin-top:0.85rem;">Recommendations update as you answer more questions.</p>
+                                @else
+                                    <div class="quiz-empty" style="padding:1.25rem; margin-top:1rem;">
+                                        <p class="quiz-empty__title" style="font-size:1rem;">No matches yet</p>
+                                        <p class="quiz-empty__text">Select a few answers to see live broker suggestions here.</p>
+                                    </div>
+                                @endif
+                            </section>
+                        </aside>
                     </div>
                 @else
-                    <div class="text-center py-12">
-                        <p class="text-xl text-gray-600">No quiz questions available at the moment.</p>
+                    <div class="quiz-empty">
+                        <h2 class="quiz-empty__title">No quiz questions available at the moment.</h2>
+                        <p class="quiz-empty__text">Please check back later when questions have been published.</p>
                     </div>
                 @endif
             @else
-                <!-- Results -->
-                <div class="mb-8">
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Your Recommended Brokers</h2>
+                <div class="quiz-grid">
+                    <section class="quiz-results" style="padding:1.25rem;">
+                        <h2 class="quiz-results__title" style="font-size:1.5rem;">Your recommended brokers</h2>
+                        <p class="quiz-panel__text">These brokers matched the preferences you selected in the quiz.</p>
 
-                    @if (count($results) > 0)
-                        <div class="space-y-4">
-                            @foreach ($results as $index => $result)
-                                @php
-                                    $broker = $result['broker'];
-                                    $score = $result['score'];
-                                    $maxScore = $totalQuestions * 10; // Assuming max weight of 10 per answer
-                                    $matchPercentage = min(round($score / $maxScore * 100), 100);
-                                @endphp
+                        @if (count($results) > 0)
+                            <div class="quiz-results__list" style="margin-top:1.25rem;">
+                                @foreach ($results as $index => $result)
+                                    @php
+                                        $broker = $result['broker'];
+                                        $score = $result['score'];
+                                        $maxScore = max($totalQuestions * 10, 1);
+                                        $matchPercentage = min(round(($score / $maxScore) * 100), 100);
+                                    @endphp
 
-                                <div class="border-2 border-gray-200 rounded-lg p-6 hover:border-indigo-600 transition-colors">
-                                    <div class="flex items-start justify-between mb-4">
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-3 mb-2">
-                                                <span class="text-2xl font-bold text-indigo-600">#{{ $index + 1 }}</span>
-                                                @if ($broker->logo)
-                                                <img src="{{ asset('storage/app/public/' . $broker->logo) }}" alt="{{ $broker->name }}" class="h-12 w-12 object-contain rounded" onerror="this.style.display='none'">
-                                                @endif
-                                                <h3 class="text-xl font-semibold text-gray-900">{{ $broker->name }}</h3>
-                                            </div>
-                                            <div class="flex items-center gap-2 mt-1">
-                                                @if ($broker->rating)
-                                                    <span class="inline-flex items-center gap-1 text-yellow-500">
-                                                        @for ($i = 0; $i < 5; $i++)
-                                                            <svg class="w-4 h-4 {{ $i < floor($broker->rating) ? 'fill-current' : 'fill-gray-300' }}" viewBox="0 0 20 20">
-                                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                                            </svg>
-                                                        @endfor
-                                                    </span>
-                                                    <span class="text-sm text-gray-600">{{ $broker->rating }}/5</span>
+                                    <article class="quiz-panel" style="padding:1.1rem; margin:0;">
+                                        <div class="quiz-results__item-top">
+                                            <div>
+                                                <p class="quiz-results__item-label">Recommendation #{{ $index + 1 }}</p>
+                                                <h3 class="quiz-results__item-value" style="font-size:1.25rem;">{{ $broker->name }}</h3>
+                                                @if ($broker->regulation)
+                                                    <p class="quiz-results__meta">{{ $broker->regulation }}</p>
                                                 @endif
                                             </div>
+                                            <div style="text-align:right;">
+                                                <p class="quiz-results__item-label">Match score</p>
+                                                <div class="quiz-results__score" style="font-size:1.4rem;">{{ $matchPercentage }}%</div>
+                                            </div>
                                         </div>
-                                        <div class="text-right">
-                                            <div class="text-sm text-gray-600 mb-1">Match Score</div>
-                                            <div class="text-3xl font-bold text-indigo-600">{{ $matchPercentage }}%</div>
-                                        </div>
-                                    </div>
 
-                                    @if ($broker->description)
-                                        <p class="text-gray-700 mb-4">{{ $broker->description }}</p>
-                                    @endif
+                                        @if ($broker->description)
+                                            <p class="quiz-panel__text" style="margin-top:0.85rem;">{{ $broker->description }}</p>
+                                        @endif
 
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        @if ($broker->min_deposit)
-                                            <div>
-                                                <p class="text-sm text-gray-600">Min. Deposit</p>
-                                                <p class="text-lg font-semibold text-gray-900">{{ $broker->min_deposit }}</p>
-                                            </div>
-                                        @endif
-                                        @if ($broker->regulation)
-                                            <div>
-                                                <p class="text-sm text-gray-600">Regulation</p>
-                                                <p class="text-lg font-semibold text-gray-900">{{ $broker->regulation }}</p>
-                                            </div>
-                                        @endif
-                                        @if ($broker->years_in_business)
-                                            <div>
-                                                <p class="text-sm text-gray-600">Years in Business</p>
-                                                <p class="text-lg font-semibold text-gray-900">{{ $broker->years_in_business }}</p>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    @if (is_array($broker->pros) && count($broker->pros) > 0 || is_array($broker->cons) && count($broker->cons) > 0)
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            @if (is_array($broker->pros) && count($broker->pros) > 0)
-                                                <div>
-                                                    <p class="text-sm font-semibold text-green-700 mb-2">Pros:</p>
-                                                    <ul class="text-sm text-gray-700 space-y-1">
-                                                        @foreach ($broker->pros as $pro)
-                                                            <li class="flex items-start gap-2">
-                                                                <span class="text-green-600 font-bold">✓</span>
-                                                                <span>{{ $pro }}</span>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
+                                        <div class="quiz-results__two-col" style="margin-top:1rem;">
+                                            @if ($broker->min_deposit)
+                                                <div class="quiz-summary__item">
+                                                    <p class="quiz-summary__item-label">Min. deposit</p>
+                                                    <p class="quiz-summary__item-value">{{ $broker->min_deposit }}</p>
                                                 </div>
                                             @endif
-                                            @if (is_array($broker->cons) && count($broker->cons) > 0)
-                                                <div>
-                                                    <p class="text-sm font-semibold text-red-700 mb-2">Cons:</p>
-                                                    <ul class="text-sm text-gray-700 space-y-1">
-                                                        @foreach ($broker->cons as $con)
-                                                            <li class="flex items-start gap-2">
-                                                                <span class="text-red-600 font-bold">✗</span>
-                                                                <span>{{ $con }}</span>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
+                                            @if ($broker->years_in_business)
+                                                <div class="quiz-summary__item">
+                                                    <p class="quiz-summary__item-label">Years in business</p>
+                                                    <p class="quiz-summary__item-value">{{ $broker->years_in_business }}</p>
                                                 </div>
                                             @endif
                                         </div>
-                                    @endif
 
-                                    @if ($broker->website)
-                                        <a href="{{ $broker->website }}" target="_blank" rel="noopener noreferrer"
-                                            class="inline-block px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
-                                            Visit Website →
-                                        </a>
-                                    @endif
+                                        <div class="quiz-badges">
+                                            <span class="quiz-badge quiz-badge--success">High match</span>
+                                            <span class="quiz-badge quiz-badge--danger">Review fees</span>
+                                        </div>
+
+                                        @if ($broker->website)
+                                            <a href="{{ $broker->website }}" target="_blank" rel="noopener noreferrer" class="quiz-results__website">Visit website</a>
+                                        @endif
+                                    </article>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="quiz-empty" style="margin-top:1rem;">
+                                <h3 class="quiz-empty__title">No matching brokers found</h3>
+                                <p class="quiz-empty__text">Try again with different answers to broaden the match results.</p>
+                            </div>
+                        @endif
+                    </section>
+
+                    <aside class="quiz-aside">
+                        <section class="quiz-summary">
+                            <h3 class="quiz-summary__title">What happens next</h3>
+                            <div class="quiz-summary__list">
+                                <div class="quiz-summary__item">
+                                    <p class="quiz-summary__item-label">Step 1</p>
+                                    <p class="quiz-summary__item-value">Review your top matches</p>
                                 </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="text-center py-12 bg-blue-50 rounded-lg">
-                            <p class="text-xl text-gray-700 mb-4">No matching brokers found for your preferences.</p>
-                            <button wire:click="resetQuiz" class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
-                                Try Again
-                            </button>
-                        </div>
-                    @endif
-                </div>
+                                <div class="quiz-summary__item">
+                                    <p class="quiz-summary__item-label">Step 2</p>
+                                    <p class="quiz-summary__item-value">Compare regulation and deposit levels</p>
+                                </div>
+                                <div class="quiz-summary__item">
+                                    <p class="quiz-summary__item-label">Step 3</p>
+                                    <p class="quiz-summary__item-value">Open the broker website</p>
+                                </div>
+                            </div>
+                        </section>
 
-                <!-- Reset Button -->
-                <div class="flex justify-center">
-                    <button wire:click="resetQuiz"
-                        class="px-6 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors">
-                        Start Over
-                    </button>
+                        <div class="quiz-actions" style="justify-content:flex-start;">
+                            <button wire:click="resetQuiz" class="quiz-button quiz-button--ghost">Start over</button>
+                        </div>
+                    </aside>
                 </div>
             @endif
-            </div>
         </div>
     </div>
 </div>

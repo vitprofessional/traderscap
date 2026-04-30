@@ -8,10 +8,11 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -30,43 +31,58 @@ class PackageResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->columns(2)
+            ->columns(['default' => 1, 'lg' => 3])
             ->components([
-                TextInput::make('name')
-                    ->label('Package name')
-                    ->placeholder('e.g. Starter, Pro, Premium')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('price')
-                    ->label('Price')
-                    ->prefix('$')
-                    ->numeric()
-                    ->required()
-                    ->minValue(0)
-                    ->step(0.01)
-                    ->placeholder('0.00'),
-                TextInput::make('duration_days')
-                    ->label('Duration')
-                    ->numeric()
-                    ->required()
-                    ->default(30)
-                    ->minValue(1)
-                    ->suffix('days'),
-                Toggle::make('is_active')
-                    ->label('Active')
-                    ->default(true)
-                    ->inline(false),
-                Textarea::make('description')
-                    ->label('Package details')
-                    ->placeholder('Briefly explain what this package offers.')
-                    ->rows(4)
-                    ->columnSpanFull(),
-                TagsInput::make('facilities')
-                    ->label('Facilities')
-                    ->placeholder('Add a facility and press enter')
-                    ->helperText('Example: 24/7 Support, Dedicated Manager, Weekly Reports')
-                    ->separator(',')
-                    ->columnSpanFull(),
+                Section::make('Package details')
+                    ->icon('heroicon-o-credit-card')
+                    ->description('Define the name, pricing, duration, and what the package includes.')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Package name')
+                            ->placeholder('e.g. Starter, Pro, Premium')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        TextInput::make('price')
+                            ->label('Price')
+                            ->prefix('$')
+                            ->numeric()
+                            ->required()
+                            ->minValue(0)
+                            ->step(0.01)
+                            ->placeholder('0.00'),
+                        TextInput::make('duration_days')
+                            ->label('Duration')
+                            ->numeric()
+                            ->required()
+                            ->default(30)
+                            ->minValue(1)
+                            ->suffix('days'),
+                        Textarea::make('description')
+                            ->label('Package details')
+                            ->placeholder('Briefly explain what this package offers.')
+                            ->rows(4)
+                            ->columnSpanFull(),
+                        TagsInput::make('facilities')
+                            ->label('Facilities')
+                            ->placeholder('Add a facility and press enter')
+                            ->helperText('Example: 24/7 Support, Dedicated Manager, Weekly Reports')
+                            ->separator(',')
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpan(['default' => 1, 'lg' => 2]),
+                Section::make('Publishing')
+                    ->icon('heroicon-o-rocket-launch')
+                    ->description('Control whether this package is visible to customers.')
+                    ->schema([
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->helperText('Inactive packages are hidden from the customer catalog.')
+                            ->default(true)
+                            ->inline(false)
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpan(['default' => 1, 'lg' => 1]),
             ]);
     }
 
@@ -134,12 +150,12 @@ class PackageResource extends Resource
                             fn (Builder $query): Builder => $query->where('price', '<=', (float) $data['price_to'])
                         );
                 }),
-        ])
-        ->recordActions([
+        ])->recordActions([
             \Filament\Actions\EditAction::make(),
-        ])->toolbarActions([
-            \Filament\Actions\CreateAction::make(),
-        ]);
+        ])
+        ->emptyStateHeading('No packages yet')
+        ->emptyStateDescription('Create your first package to make it available to customers.')
+        ->emptyStateIcon('heroicon-o-credit-card');
     }
 
     public static function getPages(): array

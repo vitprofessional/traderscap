@@ -8,12 +8,13 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkAction;
@@ -34,65 +35,120 @@ class UserPackageResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components([
-            Select::make('user_id')->relationship('user', 'name')->searchable()->required(),
-            Select::make('package_id')
-                ->relationship('package', 'name')
-                ->searchable()
-                ->required()
-                ->live()
-                ->afterStateUpdated(function ($state, callable $set) {
-                    if (!$state) {
-                        return;
-                    }
+        return $schema
+            ->columns(['default' => 1, 'lg' => 3])
+            ->components([
+                Section::make('Subscription')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->description('The customer and package for this subscription.')
+                    ->schema([
+                        Select::make('user_id')
+                            ->relationship('user', 'name')
+                            ->label('Customer')
+                            ->searchable()
+                            ->required()
+                            ->helperText('The customer this package is assigned to.')
+                            ->columnSpanFull(),
+                        Select::make('package_id')
+                            ->relationship('package', 'name')
+                            ->label('Package')
+                            ->searchable()
+                            ->required()
+                            ->live()
+                            ->helperText('Selecting a package will auto-fill the start and end dates.')
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if (!$state) {
+                                    return;
+                                }
 
-                    $package = Package::find($state);
-                    if (!$package) {
-                        return;
-                    }
+                                $package = Package::find($state);
+                                if (!$package) {
+                                    return;
+                                }
 
-                    // Set starts_at to today
-                    $set('starts_at', Carbon::today());
+                                // Set starts_at to today
+                                $set('starts_at', Carbon::today());
 
-                    // Set ends_at based on duration_days
-                    if ($package->duration_days) {
-                        $set('ends_at', Carbon::today()->addDays($package->duration_days));
-                    }
-                })
-                ->afterStateHydrated(function ($state, callable $set, $record) {
-                    if (!$state || !$record) {
-                        return;
-                    }
+                                // Set ends_at based on duration_days
+                                if ($package->duration_days) {
+                                    $set('ends_at', Carbon::today()->addDays($package->duration_days));
+                                }
+                            })
+                            ->afterStateHydrated(function ($state, callable $set, $record) {
+                                if (!$state || !$record) {
+                                    return;
+                                }
 
-                    // If starts_at or ends_at are empty, fill them based on package duration
-                    $package = Package::find($state);
-                    if (!$package) {
-                        return;
-                    }
+                                // If starts_at or ends_at are empty, fill them based on package duration
+                                $package = Package::find($state);
+                                if (!$package) {
+                                    return;
+                                }
 
-                    if (!$record->starts_at) {
-                        $set('starts_at', Carbon::today());
-                    }
+                                if (!$record->starts_at) {
+                                    $set('starts_at', Carbon::today());
+                                }
 
-                    if (!$record->ends_at && $package->duration_days) {
-                        $set('ends_at', Carbon::today()->addDays($package->duration_days));
-                    }
-                }),
-            TextInput::make('broker_name')->maxLength(255),
-            TextInput::make('trading_id')->maxLength(255),
-            TextInput::make('trading_password')->maxLength(255),
-            TextInput::make('trading_server')->maxLength(255),
-            TextInput::make('equity')->numeric()->minValue(0),
-            DatePicker::make('starts_at'),
-            DatePicker::make('ends_at'),
-            Select::make('status')->options([
-                'registered' => 'Registered',
-                'pending' => 'Pending Verify',
-                'active_waiting' => 'Active Waiting',
-                'active' => 'Active',
-                'expired' => 'Expired',
-            ])->required(),
-        ]);
+                                if (!$record->ends_at && $package->duration_days) {
+                                    $set('ends_at', Carbon::today()->addDays($package->duration_days));
+                                }
+                            })
+                            ->columnSpanFull(),
+                        DatePicker::make('starts_at')
+                            ->label('Start date')
+                            ->helperText('Auto-set when a package is selected.'),
+                        DatePicker::make('ends_at')
+                            ->label('End date')
+                            ->helperText('Auto-calculated from the package duration.'),
+                    ])
+                    ->columnSpan(['default' => 1, 'lg' => 2]),
+                Section::make('Status')
+                    ->icon('heroicon-o-signal')
+                    ->description('Current lifecycle state of this subscription.')
+                    ->schema([
+                        Select::make('status')
+                            ->label('Status')
+                            ->options([
+                                'registered' => 'Registered',
+                                'pending' => 'Pending Verify',
+                                'active_waiting' => 'Active Waiting',
+                                'active' => 'Active',
+                                'expired' => 'Expired',
+                            ])
+                            ->required()
+                            ->helperText('Changing status here also updates dates in the table.')
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpan(['default' => 1, 'lg' => 1]),
+                Section::make('Trading credentials')
+                    ->icon('heroicon-o-key')
+                    ->description('Broker account details provided to the customer.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('broker_name')
+                            ->label('Broker name')
+                            ->placeholder('e.g. XM, eToro')
+                            ->maxLength(255),
+                        TextInput::make('trading_id')
+                            ->label('Trading account ID')
+                            ->maxLength(255),
+                        TextInput::make('trading_password')
+                            ->label('Trading password')
+                            ->password()
+                            ->maxLength(255),
+                        TextInput::make('trading_server')
+                            ->label('Trading server')
+                            ->placeholder('e.g. XM-Real2')
+                            ->maxLength(255),
+                        TextInput::make('equity')
+                            ->label('Equity (USD)')
+                            ->numeric()
+                            ->prefix('$')
+                            ->minValue(0)
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -153,11 +209,15 @@ class UserPackageResource extends Resource
                     'cancelled' => 'Cancelled',
                 ])
                 ->label('Status'),
-        ])->recordActions([
+        ])->defaultSort('created_at', 'desc')
+        ->recordActions([
             \Filament\Actions\EditAction::make(),
             \Filament\Actions\DeleteAction::make(),
-        ])->toolbarActions([
-            \Filament\Actions\CreateAction::make(),
+        ])
+        ->emptyStateHeading('No user packages yet')
+        ->emptyStateDescription('Assign a package to a customer to get started.')
+        ->emptyStateIcon('heroicon-o-cube')
+        ->toolbarActions([
             BulkActionGroup::make([
                 DeleteBulkAction::make(),
                 BulkAction::make('expireSelected')

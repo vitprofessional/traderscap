@@ -177,7 +177,7 @@
 }
 </style>
 
-@php
+<?php
     $statusClass = match($ticket->status ?? 'open') {
         'open' => 'act-badge--open',
         'resolved' => 'act-badge--resolved',
@@ -186,64 +186,69 @@
     };
     $customerName = $ticket->user?->name ?? 'Customer';
     $customerInitial = strtoupper(substr($customerName, 0, 1));
-@endphp
+?>
 
 <div class="act-card">
 
-    {{-- Header --}}
+    
     <div class="act-head">
         <div class="act-head__icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         </div>
         <div class="act-head__meta">
-            <div class="act-head__ticket">Ticket #{{ $ticket->id }}</div>
-            <div class="act-head__subject">{{ $ticket->subject }}</div>
+            <div class="act-head__ticket">Ticket #<?php echo e($ticket->id); ?></div>
+            <div class="act-head__subject"><?php echo e($ticket->subject); ?></div>
             <div class="act-head__customer">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                {{ $customerName }}
-                @if($ticket->user?->email)
-                    &nbsp;·&nbsp; {{ $ticket->user->email }}
-                @endif
+                <?php echo e($customerName); ?>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($ticket->user?->email): ?>
+                    &nbsp;·&nbsp; <?php echo e($ticket->user->email); ?>
+
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
-        <span class="act-badge {{ $statusClass }}">
+        <span class="act-badge <?php echo e($statusClass); ?>">
             <span class="act-badge__dot"></span>
-            {{ ucfirst($ticket->status ?? 'open') }}
+            <?php echo e(ucfirst($ticket->status ?? 'open')); ?>
+
         </span>
     </div>
 
-    {{-- Messages --}}
+    
     <div id="act-messages" wire:poll.5s class="act-body">
-        @forelse($messages as $m)
-            @php
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
                 $isAdmin = $m->is_admin ?? false;
                 $name = $isAdmin ? 'Admin' : ($m->user?->name ?? 'Customer');
                 $initial = strtoupper(substr($name, 0, 1));
                 $attachUrl = $m->attachment
                     ? \Illuminate\Support\Facades\Storage::disk('public')->url($m->attachment)
                     : null;
-            @endphp
-            <div class="act-row {{ $isAdmin ? 'act-row--admin' : '' }}">
-                <div class="act-avatar {{ $isAdmin ? 'act-avatar--admin' : '' }}">{{ $initial }}</div>
+            ?>
+            <div class="act-row <?php echo e($isAdmin ? 'act-row--admin' : ''); ?>">
+                <div class="act-avatar <?php echo e($isAdmin ? 'act-avatar--admin' : ''); ?>"><?php echo e($initial); ?></div>
                 <div class="act-msg">
-                    <div class="act-bubble {{ $isAdmin ? 'act-bubble--admin' : 'act-bubble--user' }}">
-                        {!! nl2br(e($m->message)) !!}
-                        @if($attachUrl)
+                    <div class="act-bubble <?php echo e($isAdmin ? 'act-bubble--admin' : 'act-bubble--user'); ?>">
+                        <?php echo nl2br(e($m->message)); ?>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attachUrl): ?>
                             <div>
-                                <a href="{{ $attachUrl }}" target="_blank" class="act-bubble__attach">
+                                <a href="<?php echo e($attachUrl); ?>" target="_blank" class="act-bubble__attach">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05L12.6 19.9a4.5 4.5 0 01-6.36-6.36l8.84-8.84a3.5 3.5 0 014.95 4.95L11.2 18.3a2 2 0 01-2.83-2.83l8.49-8.49"/></svg>
                                     View attachment
                                 </a>
                             </div>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                     <div class="act-meta">
-                        {{ $m->created_at->diffForHumans() }}
-                        @if(!$isAdmin) &nbsp;·&nbsp; {{ $name }} @endif
+                        <?php echo e($m->created_at->diffForHumans()); ?>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$isAdmin): ?> &nbsp;·&nbsp; <?php echo e($name); ?> <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="act-empty">
                 <div class="act-empty__icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -251,10 +256,10 @@
                 <p style="font-size:0.9rem;font-weight:600;color:#475569;margin:0">No messages yet</p>
                 <p style="font-size:0.8rem;margin:0">Send the first reply to the customer below.</p>
             </div>
-        @endforelse
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
-    {{-- Input bar --}}
+    
     <div class="act-input-bar">
         <form wire:submit.prevent="sendMessage">
             <div class="act-input-inner">
@@ -274,21 +279,28 @@
                             <input type="file" wire:model="attachment" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx" style="display:none" />
                         </label>
                     </div>
-                    @error('attachment')
-                        <div class="act-error">{{ $message }}</div>
-                    @enderror
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['attachment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="act-error"><?php echo e($message); ?></div>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     <button type="submit" class="act-send-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                         Send reply
                     </button>
                 </div>
             </div>
-            @if($attachment)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attachment): ?>
                 <div class="act-attach-preview">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05L12.6 19.9a4.5 4.5 0 01-6.36-6.36l8.84-8.84a3.5 3.5 0 014.95 4.95L11.2 18.3a2 2 0 01-2.83-2.83l8.49-8.49"/></svg>
                     File attached — ready to send
                 </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </form>
     </div>
 
@@ -310,3 +322,4 @@
 })();
 </script>
 </div>
+<?php /**PATH C:\xampp\htdocs\traderscap\resources\views/livewire/admin-ticket-chat.blade.php ENDPATH**/ ?>
