@@ -23,6 +23,7 @@ use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\Str;
 use App\Models\Package;
 use Carbon\Carbon;
+use Filament\Forms\Components\Placeholder;
 
 class UserPackageResource extends Resource
 {
@@ -94,6 +95,25 @@ class UserPackageResource extends Resource
                                 }
                             })
                             ->columnSpanFull(),
+                        Placeholder::make('package_summary')
+                            ->label('Package summary')
+                            ->content(function ($get): string {
+                                $packageId = $get('package_id');
+                                if (!$packageId) {
+                                    return 'Select a package above to see its details.';
+                                }
+                                $package = Package::find($packageId);
+                                if (!$package) {
+                                    return '—';
+                                }
+                                $price = '$' . number_format($package->price, 0) . ' min deposit';
+                                $duration = $package->duration_label;
+                                $recommended = $package->is_recommended ? ' · ★ Recommended' : '';
+                                $facilitiesArr = is_array($package->facilities) ? $package->facilities : [];
+                                $facilities = !empty($facilitiesArr) ? implode(', ', $facilitiesArr) : 'No facilities listed';
+                                return "{$price} · {$duration}{$recommended} — {$facilities}";
+                            })
+                            ->columnSpanFull(),
                         DatePicker::make('starts_at')
                             ->label('Start date')
                             ->helperText('Auto-set when a package is selected.'),
@@ -155,7 +175,13 @@ class UserPackageResource extends Resource
     {
         return $table->columns([
             TextColumn::make('user.name')->label('User')->searchable(),
-            TextColumn::make('package.name')->label('Package')->searchable(),
+            TextColumn::make('package.name')
+                ->label('Package')
+                ->searchable()
+                ->description(fn (UserPackage $record): string => $record->package
+                    ? '$' . number_format($record->package->price, 0) . ' · ' . $record->package->duration_label . ($record->package->is_recommended ? ' · ★ Recommended' : '')
+                    : '—'
+                ),
             TextColumn::make('broker_name')->label('Broker')->searchable()->toggleable(),
             TextColumn::make('trading_id')->label('Trading ID')->searchable()->toggleable(),
             TextColumn::make('trading_server')->label('Server')->searchable()->toggleable(),

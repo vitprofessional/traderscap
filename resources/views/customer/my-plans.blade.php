@@ -46,10 +46,13 @@
                     <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
                         <!-- Left Column: Plan & Dates -->
                         <div class="space-y-8">
-                            <!-- Package Name -->
+                            <!-- Package Name + Duration -->
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Package Name</p>
                                 <p class="text-3xl font-bold text-slate-900">{{ $userPackage->package->name ?? 'N/A' }}</p>
+                                @if($userPackage->package?->duration_label)
+                                    <p class="mt-1 text-sm text-slate-500">{{ $userPackage->package->duration_label }}</p>
+                                @endif
                             </div>
 
                             <!-- Included Features -->
@@ -95,6 +98,14 @@
                                 </span>
                             </div>
 
+                            <!-- Min Deposit -->
+                            @if($userPackage->package?->price)
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Min Deposit</p>
+                                    <p class="text-3xl font-bold text-blue-700">${{ number_format($userPackage->package->price, 0) }}</p>
+                                </div>
+                            @endif
+
                             <!-- Account Equity -->
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Account Equity</p>
@@ -135,6 +146,9 @@
                             <tr class="border-b border-slate-200 transition-colors hover:bg-slate-50">
                                 <td class="px-6 py-4">
                                     <div class="font-semibold text-slate-900">{{ $userPackage->package->name ?? '—' }}</div>
+                                    @if($userPackage->package?->duration_label)
+                                        <div class="mt-0.5 text-xs font-medium text-blue-600">{{ $userPackage->package->duration_label }}</div>
+                                    @endif
                                     @if(!empty($userPackage->package?->facilities) && is_array($userPackage->package->facilities))
                                         <div class="mt-1 text-xs text-slate-600">
                                             {{ implode(' • ', $userPackage->package->facilities) }}

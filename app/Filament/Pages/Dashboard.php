@@ -116,7 +116,7 @@ class Dashboard extends BaseDashboard
             ],
             [
                 'label' => 'Packages',
-                'description' => 'Manage plans and pricing.',
+                'description' => 'Manage plans and min deposits.',
                 'url' => PackageResource::getUrl('index'),
                 'icon' => 'heroicon-o-credit-card',
             ],

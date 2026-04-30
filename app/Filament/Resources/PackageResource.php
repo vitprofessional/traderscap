@@ -3,12 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PackageResource\Pages;
+use App\Forms\Components\EditableTagsInput;
 use App\Models\Package;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -35,7 +37,7 @@ class PackageResource extends Resource
             ->components([
                 Section::make('Package details')
                     ->icon('heroicon-o-credit-card')
-                    ->description('Define the name, pricing, duration, and what the package includes.')
+                    ->description('Define the name, min deposit, duration, and what the package includes.')
                     ->schema([
                         TextInput::make('name')
                             ->label('Package name')
@@ -44,30 +46,40 @@ class PackageResource extends Resource
                             ->maxLength(255)
                             ->columnSpanFull(),
                         TextInput::make('price')
-                            ->label('Price')
+                            ->label('Min deposit')
                             ->prefix('$')
                             ->numeric()
                             ->required()
                             ->minValue(0)
                             ->step(0.01)
                             ->placeholder('0.00'),
-                        TextInput::make('duration_days')
-                            ->label('Duration')
+                        TextInput::make('duration_value')
+                            ->label('Duration value')
                             ->numeric()
                             ->required()
-                            ->default(30)
+                            ->default(1)
                             ->minValue(1)
-                            ->suffix('days'),
+                            ->suffix('units'),
+                        Select::make('duration_type')
+                            ->label('Duration type')
+                            ->required()
+                            ->default('monthly')
+                            ->options([
+                                'daily' => 'Daily',
+                                'weekly' => 'Weekly',
+                                'monthly' => 'Monthly',
+                                'yearly' => 'Yearly',
+                            ]),
                         Textarea::make('description')
                             ->label('Package details')
                             ->placeholder('Briefly explain what this package offers.')
                             ->rows(4)
                             ->columnSpanFull(),
-                        TagsInput::make('facilities')
+                        EditableTagsInput::make('facilities')
                             ->label('Facilities')
                             ->placeholder('Add a facility and press enter')
-                            ->helperText('Example: 24/7 Support, Dedicated Manager, Weekly Reports')
-                            ->separator(',')
+                            ->helperText('Click an existing facility to edit it. Use "/" between entries to add multiple facilities at once.')
+                            ->separator('/')
                             ->columnSpanFull(),
                     ])
                     ->columnSpan(['default' => 1, 'lg' => 2]),
@@ -75,10 +87,41 @@ class PackageResource extends Resource
                     ->icon('heroicon-o-rocket-launch')
                     ->description('Control whether this package is visible to customers.')
                     ->schema([
+                        Placeholder::make('recommended_notice')
+                            ->label('Recommended package notice')
+                            ->content(function (callable $get, ?Package $record): string {
+                                $existingRecommended = Package::query()
+                                    ->where('is_recommended', true)
+                                    ->when(
+                                        $record,
+                                        fn (Builder $query): Builder => $query->whereKeyNot($record->getKey())
+                                    )
+                                    ->first();
+
+                                if (! $existingRecommended) {
+                                    return $record?->is_recommended
+                                        ? 'This package is currently the recommended package.'
+                                        : 'No other package is currently marked as recommended.';
+                                }
+
+                                if ((bool) $get('is_recommended')) {
+                                    return "{$existingRecommended->name} is currently recommended. Saving this package as recommended will remove that status from {$existingRecommended->name}.";
+                                }
+
+                                return "{$existingRecommended->name} is currently recommended. Turn on Recommended package to replace it when you save.";
+                            })
+                            ->columnSpanFull(),
                         Toggle::make('is_active')
                             ->label('Active')
                             ->helperText('Inactive packages are hidden from the customer catalog.')
                             ->default(true)
+                            ->inline(false)
+                            ->columnSpanFull(),
+                        Toggle::make('is_recommended')
+                            ->label('Recommended package')
+                            ->helperText('Only one package can be recommended at a time. If you enable this and save, the current recommended package will be updated automatically.')
+                            ->default(false)
+                            ->live()
                             ->inline(false)
                             ->columnSpanFull(),
                     ])
@@ -97,17 +140,21 @@ class PackageResource extends Resource
                 ->description(fn (Package $record): string => (string) ($record->description ?? 'No details added'))
                 ->wrap(),
             TextColumn::make('price')
+                ->label('Min deposit')
                 ->money('usd')
                 ->sortable(),
-            TextColumn::make('duration_days')
-                ->label('Duration')
-                ->suffix(' days')
-                ->sortable(),
+            TextColumn::make('duration_label')
+                ->label('Duration'),
             TextColumn::make('facilities_count')
                 ->label('Facilities')
                 ->state(fn (Package $record): int => count($record->facilities ?? []))
                 ->badge()
                 ->color('gray'),
+            TextColumn::make('is_recommended')
+                ->label('Recommended')
+                ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No')
+                ->badge()
+                ->color(fn (bool $state): string => $state ? 'warning' : 'gray'),
             TextColumn::make('is_active')
                 ->label('Status')
                 ->formatStateUsing(fn (bool $state): string => $state ? 'Active' : 'Inactive')
@@ -126,15 +173,15 @@ class PackageResource extends Resource
                     '0' => 'Inactive',
                 ]),
             Filter::make('price_range')
-                ->label('Price range')
+                ->label('Min deposit range')
                 ->form([
                     TextInput::make('price_from')
-                        ->label('Min price')
+                        ->label('Min deposit from')
                         ->numeric()
                         ->minValue(0)
                         ->placeholder('0'),
                     TextInput::make('price_to')
-                        ->label('Max price')
+                        ->label('Min deposit to')
                         ->numeric()
                         ->minValue(0)
                         ->placeholder('1000'),

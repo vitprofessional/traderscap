@@ -27,11 +27,14 @@ class InvestmentPlanController extends Controller
             ? $user->userPackages()->whereIn('status', $eligibleStatuses)->exists()
             : false;
 
+        $recommendedPlanId = $plans->firstWhere('is_recommended', true)?->id;
+
         return view('customer.investment-plans', [
             'plans' => $plans,
             'hasAnyPackage' => $hasAnyPackage,
             'currentPackageId' => $latestOwnedPackage?->package_id,
             'currentPackagePrice' => $currentPackagePrice,
+            'recommendedPlanId' => $recommendedPlanId,
         ]);
     }
 
