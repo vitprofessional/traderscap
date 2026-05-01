@@ -56,9 +56,7 @@ Route::prefix('api/broker-finder')->group(function () {
 // End of WordPress broker finder routes
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [CustomerAuthController::class, 'showLoginForm'])->name('login');
 
 Route::get('/login', [CustomerAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [CustomerAuthController::class, 'login'])->name('login.attempt');

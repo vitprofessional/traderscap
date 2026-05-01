@@ -78,8 +78,8 @@ class PackageResource extends Resource
                         EditableTagsInput::make('facilities')
                             ->label('Facilities')
                             ->placeholder('Add a facility and press enter')
-                            ->helperText('Click an existing facility to edit it. Use "/" between entries to add multiple facilities at once.')
-                            ->separator('/')
+                            ->helperText('Click an existing facility to edit it. Use " / " between entries to add multiple. Drag to reorder.')
+                            ->reorderable()
                             ->columnSpanFull(),
                     ])
                     ->columnSpan(['default' => 1, 'lg' => 2]),

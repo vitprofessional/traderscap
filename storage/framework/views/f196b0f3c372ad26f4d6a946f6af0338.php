@@ -1,4 +1,13 @@
-<x-layouts.dashboard :title="'Investment Plans'">
+<?php if (isset($component)) { $__componentOriginal1a6cca1fb3b05e19b47840b98800a235 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal1a6cca1fb3b05e19b47840b98800a235 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layouts.dashboard','data' => ['title' => 'Investment Plans']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layouts.dashboard'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('Investment Plans')]); ?>
     <div class="mx-auto w-full max-w-7xl space-y-8 px-2 py-2 sm:px-4 lg:px-6 lg:py-4">
         <section class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-900 px-5 py-7 shadow-sm md:px-8 md:py-8">
             <div class="absolute -top-14 -right-10 h-36 w-36 rounded-full bg-cyan-300/20 blur-2xl"></div>
@@ -14,29 +23,29 @@
                 <div class="grid grid-cols-2 gap-2 text-xs sm:text-sm md:min-w-[240px]">
                     <div class="rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-white backdrop-blur">
                         <p class="text-slate-200/90">Available Plans</p>
-                        <p class="mt-1 text-base font-semibold">{{ $plans->count() }}</p>
+                        <p class="mt-1 text-base font-semibold"><?php echo e($plans->count()); ?></p>
                     </div>
                     <div class="rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-white backdrop-blur">
                         <p class="text-slate-200">Current Status</p>
-                        <p class="mt-1 text-xs font-semibold">{{ !empty($hasAnyPackage) ? 'Plan selected' : 'No active plan' }}</p>
+                        <p class="mt-1 text-xs font-semibold"><?php echo e(!empty($hasAnyPackage) ? 'Plan selected' : 'No active plan'); ?></p>
                     </div>
                 </div>
             </div>
         </section>
 
-        @if(session('success'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm">{{ session('success') }}</div>
-        @endif
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm"><?php echo e(session('success')); ?></div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-        @if($plans->isEmpty())
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($plans->isEmpty()): ?>
             <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
                 <p class="text-sm text-slate-600">No plans are available right now. Please check back later.</p>
             </div>
-        @else
-            @php
+        <?php else: ?>
+            <?php
                 $planCount = $plans->count();
                 $featuredPlanId = $recommendedPlanId ?? ($planCount ? $plans->values()->get(intdiv(max($planCount - 1, 0), 2))->id : null);
-            @endphp
+            ?>
 
             <section class="rounded-3xl border border-slate-200 bg-white px-5 py-6 shadow-sm md:px-8 md:py-8">
                 <div class="mb-8 text-center">
@@ -45,8 +54,8 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 lg:gap-8">
-                    @foreach($plans as $plan)
-                        @php
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $plans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $isFeatured = $featuredPlanId === $plan->id;
                             $isCurrentPlan = isset($currentPackageId) && (int) $currentPackageId === (int) $plan->id;
                             $facilities = is_array($plan->facilities) ? $plan->facilities : [];
@@ -66,88 +75,90 @@
                                 // Remove trailing zeros and decimal point if not needed
                                 $formattedPrice = rtrim(rtrim(number_format($priceInK, 1), '0'), '.') . 'k';
                             }
-                        @endphp
+                        ?>
 
-                        {{-- Wrapper provides the relative context for the floating badge --}}
+                        
                         <div class="relative pt-5">
-                            {{-- Floating badges — centered on the top edge of the card --}}
-                            @if($isFeatured || $isCurrentPlan)
+                            
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isFeatured || $isCurrentPlan): ?>
                                 <div class="absolute -top-0 left-0 right-0 z-10 flex justify-center gap-2">
-                                    @if($isCurrentPlan)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isCurrentPlan): ?>
                                         <span class="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white shadow-md ring-2 ring-white">
                                             <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                                             Current Plan
                                         </span>
-                                    @endif
-                                    @if($isFeatured)
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isFeatured): ?>
                                         <span class="inline-flex items-center gap-1 rounded-full bg-orange-500 px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.18em] text-white shadow-md ring-2 ring-white">
                                             <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                             Recommended
                                         </span>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                            <article class="flex h-full flex-col overflow-hidden rounded-[22px] border border-slate-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)] {{ $isFeatured ? 'ring-2 ring-cyan-500/20' : '' }}">
+                            <article class="flex h-full flex-col overflow-hidden rounded-[22px] border border-slate-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)] <?php echo e($isFeatured ? 'ring-2 ring-cyan-500/20' : ''); ?>">
 
                             <div class="bg-white px-5 pt-8 pb-6 text-center md:px-7">
-                                <h4 class="text-2xl font-bold tracking-tight text-slate-900">{{ $plan->name }}</h4>
+                                <h4 class="text-2xl font-bold tracking-tight text-slate-900"><?php echo e($plan->name); ?></h4>
                             </div>
 
                             <div class="bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 px-5 py-8 text-center text-white md:px-7">
                                 <div class="leading-none">
-                                    <span class="text-4xl font-black tracking-tighter">$</span><span class="text-5xl font-black tracking-tighter">{{ $formattedPrice }}</span>
+                                    <span class="text-4xl font-black tracking-tighter">$</span><span class="text-5xl font-black tracking-tighter"><?php echo e($formattedPrice); ?></span>
                                 </div>
                                 <div class="mt-1 text-sm font-semibold text-white/95">Min Deposit</div>
-                                <div class="mt-2 text-xs font-medium text-white/85">/ {{ $plan->duration_label }}</div>
+                                <div class="mt-2 text-xs font-medium text-white/85">/ <?php echo e($plan->duration_label); ?></div>
                             </div>
 
                             <div class="border-b border-slate-100 px-5 py-5 text-center md:px-7">
                                 <p class="text-sm leading-6 text-slate-500">
-                                    {{ $plan->description ?: 'A flexible plan designed to help you grow with confidence.' }}
+                                    <?php echo e($plan->description ?: 'A flexible plan designed to help you grow with confidence.'); ?>
+
                                 </p>
                             </div>
 
                             <div class="flex flex-1 flex-col px-5 py-6 md:px-7">
                                 <ul class="space-y-2.5 text-sm leading-5 text-slate-600">
-                                    @forelse($facilities as $facility)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $facilities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <li class="flex items-start gap-2">
                                             <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                             </svg>
-                                            <span class="text-slate-700">{{ $facility }}</span>
+                                            <span class="text-slate-700"><?php echo e($facility); ?></span>
                                         </li>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <li class="text-sm text-slate-500">No facilities listed</li>
-                                    @endforelse
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </ul>
 
                                 <div class="mt-auto pt-7">
-                                    @if($isCurrentPlan)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isCurrentPlan): ?>
                                         <div class="w-full rounded-full bg-slate-100 px-5 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-slate-600">
                                             Active Package
                                         </div>
-                                    @else
-                                        <a href="{{ route('investment-plans.request', $plan) }}" class="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.12em] text-white shadow-lg shadow-rose-600/30 transition-all duration-200 hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-600/40 active:scale-95">
-                                            {{ $buttonLabel }}
+                                    <?php else: ?>
+                                        <a href="<?php echo e(route('investment-plans.request', $plan)); ?>" class="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.12em] text-white shadow-lg shadow-rose-600/30 transition-all duration-200 hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-600/40 active:scale-95">
+                                            <?php echo e($buttonLabel); ?>
+
                                         </a>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
                             </div>
                         </article>
-                        </div>{{-- end .relative.pt-5 wrapper --}}
-                    @endforeach
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </section>
 
-            @php
+            <?php
                 $steps = [
                     ['number' => '01', 'title' => 'Discover', 'points' => ['Determine your financial goals', 'Identify your risk profile']],
                     ['number' => '02', 'title' => 'Propose', 'points' => ['Pick the right package level', 'Match facilities with your objectives']],
                     ['number' => '03', 'title' => 'Implement', 'points' => ['Submit your trading details', 'Your plan moves to pending verification']],
                     ['number' => '04', 'title' => 'Guide', 'points' => ['Receive regular plan updates', 'Renew or adjust as needed']],
                 ];
-            @endphp
+            ?>
 
             <section class="rounded-3xl border border-slate-200 bg-white px-5 py-6 shadow-sm md:px-8 md:py-8">
                 <div class="mb-8 text-center">
@@ -156,28 +167,38 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4 xl:gap-8">
-                    @foreach($steps as $step)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $steps; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $step): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                            <div class="border-b border-slate-200 px-5 py-3 text-2xl font-semibold text-slate-900">{{ $step['number'] }}</div>
-                            <div class="bg-cyan-700 px-5 py-4 text-3xl font-semibold leading-none text-white">{{ $step['title'] }}</div>
+                            <div class="border-b border-slate-200 px-5 py-3 text-2xl font-semibold text-slate-900"><?php echo e($step['number']); ?></div>
+                            <div class="bg-cyan-700 px-5 py-4 text-3xl font-semibold leading-none text-white"><?php echo e($step['title']); ?></div>
                             <div class="p-5">
                                 <ul class="space-y-2 text-sm text-slate-700">
-                                    @foreach($step['points'] as $point)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $step['points']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $point): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <li class="flex items-start gap-2">
                                             <span class="mt-1 h-1.5 w-1.5 rounded-full bg-cyan-700"></span>
-                                            <span>{{ $point }}</span>
+                                            <span><?php echo e($point); ?></span>
                                         </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </ul>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </section>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
-</x-layouts.dashboard>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal1a6cca1fb3b05e19b47840b98800a235)): ?>
+<?php $attributes = $__attributesOriginal1a6cca1fb3b05e19b47840b98800a235; ?>
+<?php unset($__attributesOriginal1a6cca1fb3b05e19b47840b98800a235); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal1a6cca1fb3b05e19b47840b98800a235)): ?>
+<?php $component = $__componentOriginal1a6cca1fb3b05e19b47840b98800a235; ?>
+<?php unset($__componentOriginal1a6cca1fb3b05e19b47840b98800a235); ?>
+<?php endif; ?>
 
 
 
 
+<?php /**PATH C:\xampp\htdocs\traderscap\resources\views/customer/investment-plans.blade.php ENDPATH**/ ?>

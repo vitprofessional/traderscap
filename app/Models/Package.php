@@ -10,6 +10,8 @@ class Package extends Model
 {
     use HasFactory;
 
+    private const FACILITY_SEPARATOR_PATTERN = '/\r\n|\r|\n|,|\s\/\s/';
+
     public const DURATION_TYPES = [
         'daily' => 1,
         'weekly' => 7,
@@ -39,7 +41,7 @@ class Package extends Model
         return Attribute::make(
             get: function ($value): array {
                 if (is_array($value)) {
-                    return array_values(array_filter(array_map('trim', $value), fn ($item) => $item !== ''));
+                    return self::normalizeFacilities($value);
                 }
 
                 if ($value === null || $value === '') {
@@ -49,51 +51,52 @@ class Package extends Model
                 $decoded = json_decode((string) $value, true);
 
                 if (is_array($decoded)) {
-                    return array_values(array_filter(array_map('trim', $decoded), fn ($item) => $item !== ''));
+                    return self::normalizeFacilities($decoded);
                 }
 
                 if (is_string($decoded)) {
                     $value = $decoded;
                 }
 
-                $items = preg_split('/\r\n|\r|\n|\/|,/', (string) $value) ?: [];
-
-                return array_values(array_filter(array_map('trim', $items), fn ($item) => $item !== ''));
+                return self::normalizeFacilities([(string) $value]);
             },
             set: function ($value): ?string {
                 if ($value === null || $value === '') {
                     return null;
                 }
 
-                $items = is_array($value) ? $value : [$value];
-
-                $normalizedItems = [];
-
-                foreach ($items as $item) {
-                    $raw = is_array($item)
-                        ? ($item['value'] ?? $item['facility'] ?? '')
-                        : $item;
-
-                    if (! is_string($raw) && ! is_numeric($raw)) {
-                        continue;
-                    }
-
-                    $parts = preg_split('/\r\n|\r|\n|\/|,/', (string) $raw) ?: [];
-
-                    foreach ($parts as $part) {
-                        $part = trim($part);
-
-                        if ($part !== '') {
-                            $normalizedItems[] = $part;
-                        }
-                    }
-                }
-
-                $normalized = array_values(array_unique($normalizedItems));
+                $normalized = self::normalizeFacilities(is_array($value) ? $value : [$value]);
 
                 return json_encode($normalized);
             },
         );
+    }
+
+    public static function normalizeFacilities(array $items): array
+    {
+        $normalizedItems = [];
+
+        foreach ($items as $item) {
+            $raw = is_array($item)
+                ? ($item['value'] ?? $item['facility'] ?? '')
+                : $item;
+
+            if (! is_string($raw) && ! is_numeric($raw)) {
+                continue;
+            }
+
+            $parts = preg_split(self::FACILITY_SEPARATOR_PATTERN, (string) $raw) ?: [];
+
+            foreach ($parts as $part) {
+                $part = trim($part);
+
+                if ($part !== '') {
+                    $normalizedItems[] = $part;
+                }
+            }
+        }
+
+        return array_values(array_unique($normalizedItems));
     }
 
     protected function durationLabel(): Attribute

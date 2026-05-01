@@ -76,22 +76,11 @@ class CreatePackage extends CreateRecord
         $data['duration_value'] = $durationValue;
         $data['duration_days'] = $durationValue * $multiplier;
 
-        $facilityRows = is_array($data['facilities'] ?? null) ? $data['facilities'] : [];
-        $facilities = [];
-
-        foreach ($facilityRows as $facilityRow) {
-            $parts = preg_split('/\r\n|\r|\n|\/|,/', (string) $facilityRow) ?: [];
-
-            foreach ($parts as $part) {
-                $part = trim($part);
-
-                if ($part !== '') {
-                    $facilities[] = $part;
-                }
-            }
+        $raw = $data['facilities'] ?? [];
+        if (is_string($raw)) {
+            $raw = array_filter(array_map('trim', explode('/', $raw)), fn ($v) => $v !== '');
         }
-
-        $data['facilities'] = array_values(array_unique($facilities));
+        $data['facilities'] = Package::normalizeFacilities(is_array($raw) ? $raw : []);
 
         return $data;
     }

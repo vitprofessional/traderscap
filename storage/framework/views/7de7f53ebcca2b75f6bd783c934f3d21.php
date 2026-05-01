@@ -1,4 +1,4 @@
-@php
+<?php
     $fieldWrapperView = $getFieldWrapperView();
     $extraAttributes = $getExtraAttributes();
     $extraInputAttributeBag = $getExtraInputAttributeBag();
@@ -19,42 +19,48 @@
     $suffixIcon = $getSuffixIcon();
     $suffixIconColor = $getSuffixIconColor();
     $suffixLabel = $getSuffixLabel();
-@endphp
+?>
 
-<x-dynamic-component
-    :component="$fieldWrapperView"
-    :field="$field"
-    class="fi-fo-tags-input-wrp"
->
-    <x-filament::input.wrapper
-        :disabled="$isDisabled"
-        :inline-prefix="$isPrefixInline"
-        :inline-suffix="$isSuffixInline"
-        :prefix="$prefixLabel"
-        :prefix-actions="$prefixActions"
-        :prefix-icon="$prefixIcon"
-        :prefix-icon-color="$prefixIconColor"
-        :suffix="$suffixLabel"
-        :suffix-actions="$suffixActions"
-        :suffix-icon="$suffixIcon"
-        :suffix-icon-color="$suffixIconColor"
-        :valid="! $errors->has($statePath)"
-        x-on:focus-input.stop="$el.querySelector('input')?.focus()"
-        :attributes="
+<?php if (isset($component)) { $__componentOriginal511d4862ff04963c3c16115c05a86a9d = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal511d4862ff04963c3c16115c05a86a9d = $attributes; } ?>
+<?php $component = Illuminate\View\DynamicComponent::resolve(['component' => $fieldWrapperView] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('dynamic-component'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\DynamicComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['field' => $field,'class' => 'fi-fo-tags-input-wrp']); ?>
+    <?php if (isset($component)) { $__componentOriginal505efd9768415fdb4543e8c564dad437 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal505efd9768415fdb4543e8c564dad437 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament::components.input.wrapper','data' => ['disabled' => $isDisabled,'inlinePrefix' => $isPrefixInline,'inlineSuffix' => $isSuffixInline,'prefix' => $prefixLabel,'prefixActions' => $prefixActions,'prefixIcon' => $prefixIcon,'prefixIconColor' => $prefixIconColor,'suffix' => $suffixLabel,'suffixActions' => $suffixActions,'suffixIcon' => $suffixIcon,'suffixIconColor' => $suffixIconColor,'valid' => ! $errors->has($statePath),'xOn:focusInput.stop' => '$el.querySelector(\'input\')?.focus()','attributes' => 
             \Filament\Support\prepare_inherited_attributes($attributes)
                 ->merge($extraAttributes, escape: false)
                 ->class([
                     'fi-fo-tags-input',
                     'fi-disabled' => $isDisabled,
                 ])
-        "
-    >
+        ]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('filament::input.wrapper'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($isDisabled),'inline-prefix' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($isPrefixInline),'inline-suffix' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($isSuffixInline),'prefix' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($prefixLabel),'prefix-actions' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($prefixActions),'prefix-icon' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($prefixIcon),'prefix-icon-color' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($prefixIconColor),'suffix' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($suffixLabel),'suffix-actions' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($suffixActions),'suffix-icon' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($suffixIcon),'suffix-icon-color' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($suffixIconColor),'valid' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(! $errors->has($statePath)),'x-on:focus-input.stop' => '$el.querySelector(\'input\')?.focus()','attributes' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(
+            \Filament\Support\prepare_inherited_attributes($attributes)
+                ->merge($extraAttributes, escape: false)
+                ->class([
+                    'fi-fo-tags-input',
+                    'fi-disabled' => $isDisabled,
+                ])
+        )]); ?>
         <div
             x-load
-            x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('tags-input', 'filament/forms') }}"
+            x-load-src="<?php echo e(\Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('tags-input', 'filament/forms')); ?>"
             x-data="{
-                        state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
-                        splitKeys: @js($getSplitKeys()),
+                        state: $wire.<?php echo e($applyStateBindingModifiers("\$entangle('{$statePath}')")); ?>,
+                        splitKeys: <?php echo \Illuminate\Support\Js::from($getSplitKeys())->toHtml() ?>,
                         newTag: '',
                         editingIndex: null,
 
@@ -205,11 +211,11 @@
                             },
                         },
                     }"
-            {{ $getExtraAlpineAttributeBag() }}
+            <?php echo e($getExtraAlpineAttributeBag()); ?>
+
         >
             <input
-                {{
-                    $extraInputAttributeBag
+                <?php echo e($extraInputAttributeBag
                         ->merge([
                             'autocomplete' => 'off',
                             'autofocus' => $isAutofocused,
@@ -225,29 +231,29 @@
                             'fi-input',
                             'fi-input-has-inline-prefix' => $isPrefixInline && (count($prefixActions) || $prefixIcon || filled($prefixLabel)),
                             'fi-input-has-inline-suffix' => $isSuffixInline && (count($suffixActions) || $suffixIcon || filled($suffixLabel)),
-                        ])
-                }}
+                        ])); ?>
+
             />
 
-            <datalist id="{{ $id }}-suggestions">
-                @foreach ($getSuggestions() as $suggestion)
+            <datalist id="<?php echo e($id); ?>-suggestions">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $getSuggestions(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $suggestion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <template
-                        x-bind:key="@js($suggestion)"
-                        x-if="! (state?.includes(@js($suggestion)) ?? true)"
+                        x-bind:key="<?php echo \Illuminate\Support\Js::from($suggestion)->toHtml() ?>"
+                        x-if="! (state?.includes(<?php echo \Illuminate\Support\Js::from($suggestion)->toHtml() ?>) ?? true)"
                     >
-                        <option value="{{ $suggestion }}" />
+                        <option value="<?php echo e($suggestion); ?>" />
                     </template>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </datalist>
 
             <div wire:ignore>
                 <template x-cloak x-if="state?.length">
                     <div
-                        @if ($isReorderable)
+                        <?php if($isReorderable): ?>
                             x-on:end.stop="reorderTags($event)"
                             x-sortable
-                            data-sortable-animation-duration="{{ $getReorderAnimationDuration() }}"
-                        @endif
+                            data-sortable-animation-duration="<?php echo e($getReorderAnimationDuration()); ?>"
+                        <?php endif; ?>
                         class="fi-fo-tags-input-tags-ctn"
                     >
                         <template
@@ -255,26 +261,28 @@
                             x-bind:key="`${tag}-${index}`"
                         >
                             <span
-                                @if ($isReorderable)
+                                <?php if($isReorderable): ?>
                                     x-bind:x-sortable-item="index"
                                     x-sortable-handle
-                                @endif
-                                @class([
+                                <?php endif; ?>
+                                class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                                     'fi-badge',
                                     "fi-color-{$color}",
                                     'fi-reorderable' => $isReorderable,
-                                ])
+                                ]); ?>"
                             >
                                 <span class="fi-badge-label-ctn">
                                     <span
                                     class="fi-badge-label cursor-text"
                                     x-on:click.stop="beginEdit(index)"
                                 >
-                                    {{ $getTagPrefix() }}
+                                    <?php echo e($getTagPrefix()); ?>
+
 
                                     <span x-text="tag"></span>
 
-                                        {{ $getTagSuffix() }}
+                                        <?php echo e($getTagSuffix()); ?>
+
                                     </span>
                                 </span>
 
@@ -282,15 +290,14 @@
                                     type="button"
                                     class="fi-badge-delete-btn"
                                     x-on:click.stop="deleteTagByIndex(index)"
-                                    x-bind:aria-label="'{{ __('filament-forms::components.tags_input.actions.delete.label') }}: ' + tag"
+                                    x-bind:aria-label="'<?php echo e(__('filament-forms::components.tags_input.actions.delete.label')); ?>: ' + tag"
                                 >
-                                    {{
-                                        \Filament\Support\generate_icon_html(
+                                    <?php echo e(\Filament\Support\generate_icon_html(
                                             \Filament\Support\Icons\Heroicon::XMark,
                                             alias: \Filament\Support\View\SupportIconAlias::BADGE_DELETE_BUTTON,
                                             size: \Filament\Support\Enums\IconSize::ExtraSmall,
-                                        )
-                                    }}
+                                        )); ?>
+
                                 </button>
                             </span>
                         </template>
@@ -298,5 +305,24 @@
                 </template>
             </div>
         </div>
-    </x-filament::input.wrapper>
-</x-dynamic-component>
+     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal505efd9768415fdb4543e8c564dad437)): ?>
+<?php $attributes = $__attributesOriginal505efd9768415fdb4543e8c564dad437; ?>
+<?php unset($__attributesOriginal505efd9768415fdb4543e8c564dad437); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal505efd9768415fdb4543e8c564dad437)): ?>
+<?php $component = $__componentOriginal505efd9768415fdb4543e8c564dad437; ?>
+<?php unset($__componentOriginal505efd9768415fdb4543e8c564dad437); ?>
+<?php endif; ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal511d4862ff04963c3c16115c05a86a9d)): ?>
+<?php $attributes = $__attributesOriginal511d4862ff04963c3c16115c05a86a9d; ?>
+<?php unset($__attributesOriginal511d4862ff04963c3c16115c05a86a9d); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal511d4862ff04963c3c16115c05a86a9d)): ?>
+<?php $component = $__componentOriginal511d4862ff04963c3c16115c05a86a9d; ?>
+<?php unset($__componentOriginal511d4862ff04963c3c16115c05a86a9d); ?>
+<?php endif; ?>
+<?php /**PATH C:\xampp\htdocs\traderscap\resources\views/forms/components/editable-tags-input.blade.php ENDPATH**/ ?>

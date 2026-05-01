@@ -17,18 +17,36 @@ class PackageSeeder extends Seeder
 
         Package::create([
             'name' => 'Basic',
-            'description' => 'Basic plan for new users',
+            'description' => 'Ideal for new investors entering the forex market',
+            'facilities' => [
+                'Beginner-friendly account setup guidance',
+                'Managed forex market exposure',
+                'Weekly performance updates',
+                'Email support',
+            ],
             'price' => 0,
+            'duration_type' => 'daily',
+            'duration_value' => 30,
             'duration_days' => 30,
             'is_active' => true,
         ]);
 
         Package::create([
-            'name' => 'Pro',
-            'description' => 'Pro plan with extra features',
-            'price' => 49.99,
+            'name' => 'Premium',
+            'description' => 'Balanced growth with enhanced risk control',
+            'facilities' => [
+                'Advanced portfolio management',
+                'Enhanced risk control strategy',
+                'Priority support access',
+                'Detailed performance reporting',
+                'Dedicated account oversight',
+            ],
+            'price' => 25000,
+            'duration_type' => 'yearly',
+            'duration_value' => 1,
             'duration_days' => 365,
             'is_active' => true,
+            'is_recommended' => true,
         ]);
     }
 }
