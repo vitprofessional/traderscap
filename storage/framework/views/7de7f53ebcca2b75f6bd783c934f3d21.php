@@ -71,7 +71,7 @@
                                 return
                             }
 
-                            const parts = this.newTag.split(/\s*\/\s*|,/).map(s => s.trim()).filter(s => s !== '')
+                            const parts = this.newTag.split(',').map(s => s.trim()).filter(s => s !== '')
 
                             if (parts.length > 1) {
                                 if (this.editingIndex !== null) {

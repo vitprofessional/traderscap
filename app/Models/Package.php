@@ -10,7 +10,7 @@ class Package extends Model
 {
     use HasFactory;
 
-    private const FACILITY_SEPARATOR_PATTERN = '/\r\n|\r|\n|,|\s\/\s/';
+    private const FACILITY_SEPARATOR_PATTERN = '/\r\n|\r|\n|,/';
 
     public const DURATION_TYPES = [
         'daily' => 1,
