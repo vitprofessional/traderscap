@@ -26,9 +26,13 @@ class ExpireUserPackages extends Command
 
         $this->info('Found ' . $expired->count() . ' packages to expire.');
 
+        $affectedUserIds = [];
+
         foreach ($expired as $up) {
             $up->status = 'expired';
-            $up->save();
+            $up->save(); // fires UserPackage::saved → User::syncStatus() automatically
+
+            $affectedUserIds[] = $up->user_id;
 
             $this->info("Expired package id={$up->id} for user_id={$up->user_id}");
 
@@ -42,32 +46,13 @@ class ExpireUserPackages extends Command
                 report($e);
                 $this->error('Failed to send notification for user_package id=' . $up->id);
             }
-
-            // Update user status to expired if they have no active packages
-            $user = User::find($up->user_id);
-            if ($user) {
-                $hasActive = $user->userPackages()->where('status', 'active')->exists();
-                if (! $hasActive) {
-                    $user->status = 'expired';
-                    $user->save();
-                    $this->info("User id={$user->id} marked as expired");
-                }
-            }
         }
 
-        // Ensure users with active packages are marked 'active'
-        $this->info('Ensuring users with active packages are marked active...');
-        $usersWithActive = User::whereHas('userPackages', function ($q) {
-            $q->where('status', 'active')->where(function ($q2) {
-                $q2->whereNull('ends_at')->orWhere('ends_at', '>=', Carbon::today());
-            });
-        })->get();
-
-        foreach ($usersWithActive as $u) {
-            if ($u->status !== 'active') {
-                $u->status = 'active';
-                $u->save();
-                $this->info("User id={$u->id} marked as active");
+        // Log the resulting user statuses for any affected users
+        foreach (array_unique($affectedUserIds) as $uid) {
+            $u = User::find($uid);
+            if ($u) {
+                $this->info("User id={$u->id} status is now: {$u->status}");
             }
         }
 

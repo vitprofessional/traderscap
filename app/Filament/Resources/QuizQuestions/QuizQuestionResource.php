@@ -19,10 +19,10 @@ class QuizQuestionResource extends Resource
 {
     protected static ?string $model = QuizQuestion::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-    protected static \UnitEnum|string|null $navigationGroup = 'Catalog';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static \UnitEnum|string|null $navigationGroup = 'Quiz & Brokers';
     protected static ?string $navigationLabel = 'Quiz Questions';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'title';
 

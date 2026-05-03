@@ -32,6 +32,11 @@ class UserPackageResource extends Resource
     protected static ?string $navigationLabel = 'User Packages';
     protected static ?int $navigationSort = 6;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -184,15 +189,7 @@ class UserPackageResource extends Resource
                                 if ($record->user) {
                                     $record->user->notify(new \App\Notifications\PackageExpiredNotification($record));
                                 }
-
-                                // update user status if no active packages
-                                if ($record->user) {
-                                    $hasActive = $record->user->userPackages()->where('status', 'active')->exists();
-                                    if (! $hasActive) {
-                                        $record->user->status = 'expired';
-                                        $record->user->save();
-                                    }
-                                }
+                                // user status is synced automatically via UserPackage::saved model event
 
                                 $count++;
                             } catch (\Throwable $e) {

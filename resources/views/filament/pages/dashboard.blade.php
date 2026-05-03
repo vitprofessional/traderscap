@@ -1,827 +1,599 @@
 <x-filament-panels::page>
-    @php
-        $summaryCards = $this->getDashboardSummary();
-        $highlights = $this->getMonthlyHighlights();
-        $recentTickets = $this->getRecentTickets();
-        $quickActions = $this->getQuickActions();
-        $openTickets = \App\Models\Ticket::query()->where('status', 'open')->count();
-        $activeCustomers = \App\Models\User::query()->where('status', 'active')->count();
-
-        $cardStyles = [
-            'amber' => ['surface' => 'rgba(251, 191, 36, 0.12)', 'color' => '#b45309'],
-            'emerald' => ['surface' => 'rgba(16, 185, 129, 0.12)', 'color' => '#047857'],
-            'rose' => ['surface' => 'rgba(244, 63, 94, 0.12)', 'color' => '#be123c'],
-            'sky' => ['surface' => 'rgba(14, 165, 233, 0.12)', 'color' => '#0369a1'],
-        ];
-    @endphp
-
-    <style>
-        .admin-dashboard {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .admin-dashboard[x-cloak] {
-            display: none !important;
-        }
-
-        .dashboard-hero {
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            border-radius: 1.75rem;
-            background:
-                radial-gradient(circle at top left, rgba(251, 191, 36, 0.22), transparent 26%),
-                radial-gradient(circle at right center, rgba(59, 130, 246, 0.12), transparent 22%),
-                linear-gradient(135deg, #0f172a 0%, #111827 52%, #0b1220 100%);
-            color: #f8fafc;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
-        }
-
-        .dashboard-hero::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 36%),
-                radial-gradient(circle at 76% 18%, rgba(255, 255, 255, 0.06), transparent 18%);
-            pointer-events: none;
-        }
-
-        .dashboard-hero__inner {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            gap: 1.5rem;
-            padding: 1.75rem;
-        }
-
-        .dashboard-hero__content {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .dashboard-kicker {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            width: fit-content;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.06);
-            padding: 0.5rem 0.9rem;
-            font-size: 0.875rem;
-            color: rgba(248, 250, 252, 0.9);
-        }
-
-        .dashboard-kicker__dot {
-            width: 0.5rem;
-            height: 0.5rem;
-            border-radius: 999px;
-            background: #fbbf24;
-            box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.16);
-        }
-
-        .dashboard-hero__meta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.65rem;
-        }
-
-        .dashboard-hero__meta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.45rem 0.8rem;
-            font-size: 0.78rem;
-            color: rgba(226, 232, 240, 0.82);
-        }
-
-        .dashboard-hero__meta strong {
-            color: #fff;
-            font-weight: 700;
-        }
-
-        .dashboard-title {
-            margin: 0;
-            max-width: 14ch;
-            font-size: clamp(2.1rem, 4vw, 3.35rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            line-height: 1.02;
-        }
-
-        .dashboard-subtitle {
-            max-width: 46rem;
-            margin: 0;
-            font-size: 1.02rem;
-            line-height: 1.7;
-            color: rgba(226, 232, 240, 0.78);
-        }
-
-        .dashboard-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .dashboard-tab {
-            appearance: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #e2e8f0;
-            padding: 0.7rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
-        }
-
-        .dashboard-tab:hover {
-            transform: translateY(-1px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(251, 191, 36, 0.24);
-        }
-
-        .dashboard-tab.is-active {
-            background: #fbbf24;
-            color: #0f172a;
-            border-color: #fbbf24;
-            box-shadow: 0 10px 24px rgba(251, 191, 36, 0.22);
-        }
-
-        .dashboard-hero__footnote {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .dashboard-hero__footnote-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.5rem 0.85rem;
-            font-size: 0.8rem;
-            color: rgba(226, 232, 240, 0.82);
-        }
-
-        .dashboard-hero__footnote-dot {
-            width: 0.45rem;
-            height: 0.45rem;
-            border-radius: 999px;
-            background: #fbbf24;
-            box-shadow: 0 0 0 5px rgba(251, 191, 36, 0.12);
-        }
-
-        .dashboard-hero__stats {
-            display: grid;
-            gap: 0.9rem;
-            align-content: start;
-        }
-
-        .dashboard-hero__mini {
-            border-radius: 1.25rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-        }
-
-        .dashboard-hero__mini-label {
-            margin: 0;
-            font-size: 0.9rem;
-            color: rgba(226, 232, 240, 0.75);
-        }
-
-        .dashboard-hero__mini-value {
-            margin: 0.4rem 0 0;
-            font-size: 2.1rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-        }
-
-        .dashboard-hero__mini-note {
-            margin: 0.25rem 0 0;
-            font-size: 0.8rem;
-            color: rgba(203, 213, 225, 0.72);
-        }
-
-        .dashboard-hero__summary {
-            border-radius: 1.35rem;
-            border: 1px solid rgba(251, 191, 36, 0.18);
-            background: rgba(251, 191, 36, 0.1);
-            padding: 1.1rem;
-        }
-
-        .dashboard-hero__summary-title {
-            margin: 0;
-            font-size: 0.95rem;
-            color: #fef3c7;
-        }
-
-        .dashboard-hero__summary-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.75rem;
-            margin-top: 0.95rem;
-        }
-
-        .dashboard-hero__summary-item p {
-            margin: 0;
-        }
-
-        .dashboard-hero__summary-value {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .dashboard-hero__summary-label {
-            margin-top: 0.25rem !important;
-            font-size: 0.78rem;
-            line-height: 1.45;
-            color: rgba(255, 247, 237, 0.78);
-        }
-
-        .dashboard-section {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .dashboard-section[hidden] {
-            display: none !important;
-        }
-
-        .dashboard-cards {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(1, minmax(0, 1fr));
-        }
-
-        .dashboard-card {
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            border-radius: 1.35rem;
-            background: #fff;
-            padding: 1.2rem;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
-            transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
-            border-color: rgba(251, 191, 36, 0.18);
-        }
-
-        .dashboard-card__top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .dashboard-card__label {
-            margin: 0;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        .dashboard-card__value {
-            margin: 0.7rem 0 0;
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            color: #0f172a;
-        }
-
-        .dashboard-card__detail {
-            margin: 0.3rem 0 0;
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        .dashboard-card__icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 3rem;
-            height: 3rem;
-            border-radius: 1rem;
-            flex-shrink: 0;
-        }
-
-        .dashboard-panel {
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            border-radius: 1.5rem;
-            background: #fff;
-            padding: 1.4rem;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
-        }
-
-        .dashboard-panel__header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .dashboard-panel__title {
-            margin: 0;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .dashboard-panel__subtitle {
-            margin: 0.35rem 0 0;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: #64748b;
-        }
-
-        .dashboard-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.45rem;
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            border-radius: 999px;
-            background: #fff;
-            padding: 0.7rem 1rem;
-            color: #0f172a;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
-        }
-
-        .dashboard-button:hover {
-            transform: translateY(-1px);
-            border-color: rgba(251, 191, 36, 0.32);
-            background: rgba(255, 251, 235, 0.9);
-        }
-
-        .dashboard-metrics {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(1, minmax(0, 1fr));
-        }
-
-        .dashboard-metric {
-            border-radius: 1.15rem;
-            background: #f8fafc;
-            padding: 1rem;
-        }
-
-        .dashboard-metric__label {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        .dashboard-metric__value {
-            margin: 0.35rem 0 0;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .dashboard-list {
-            display: grid;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        .dashboard-list__item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            border-radius: 1rem;
-            background: #f8fafc;
-            padding: 0.9rem 1rem;
-            text-decoration: none;
-            color: inherit;
-            transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
-        }
-
-        .dashboard-list__item:hover {
-            transform: translateY(-1px);
-            border-color: rgba(251, 191, 36, 0.28);
-            background: rgba(255, 251, 235, 0.95);
-        }
-
-        .dashboard-list__title {
-            margin: 0;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        .dashboard-list__meta {
-            margin: 0.25rem 0 0;
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        .dashboard-pill {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 0.35rem 0.7rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .dashboard-pill--neutral {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        .dashboard-pill--open {
-            background: rgba(244, 63, 94, 0.12);
-            color: #be123c;
-        }
-
-        .dashboard-pill--resolved {
-            background: rgba(16, 185, 129, 0.12);
-            color: #047857;
-        }
-
-        .dashboard-quick-grid {
-            display: grid;
-            gap: 0.8rem;
-        }
-
-        .dashboard-quick-link {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            border-radius: 1.1rem;
-            background: #f8fafc;
-            padding: 1rem;
-            text-decoration: none;
-            color: inherit;
-            transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
-        }
-
-        .dashboard-quick-link:hover {
-            transform: translateY(-1px);
-            border-color: rgba(251, 191, 36, 0.28);
-            background: rgba(255, 251, 235, 0.95);
-        }
-
-        .dashboard-quick-link__icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 0.95rem;
-            background: #fff;
-            color: #475569;
-            flex-shrink: 0;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-        }
-
-        .dashboard-quick-link__title {
-            margin: 0;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        .dashboard-quick-link__description {
-            margin: 0.25rem 0 0;
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        .dashboard-support {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .dashboard-support__focus {
-            border-radius: 1.2rem;
-            background: #0f172a;
-            padding: 1rem;
-            color: #fff;
-        }
-
-        .dashboard-support__focus p {
-            margin: 0;
-        }
-
-        .dashboard-support__focus-label {
-            font-size: 0.85rem;
-            color: rgba(226, 232, 240, 0.8);
-        }
-
-        .dashboard-support__focus-value {
-            margin-top: 0.35rem !important;
-            font-size: 1.9rem;
-            font-weight: 700;
-        }
-
-        @media (min-width: 768px) {
-            .dashboard-hero__inner {
-                grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
-                align-items: stretch;
-            }
-
-            .dashboard-cards {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .dashboard-metrics {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (min-width: 1280px) {
-            .dashboard-cards {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-
-            .dashboard-support {
-                grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
-            }
-        }
-    </style>
-
-    <div x-data="{ tab: 'overview' }" class="admin-dashboard" x-cloak>
-        <section class="dashboard-hero">
-            <div class="dashboard-hero__inner">
-                <div class="dashboard-hero__content">
-                    <div class="dashboard-kicker">
-                        <span class="dashboard-kicker__dot"></span>
-                        Admin overview
-                    </div>
-
-                    <div class="dashboard-hero__meta-row">
-                        <span class="dashboard-hero__meta">Panel <strong>Traderscap</strong></span>
-                        <span class="dashboard-hero__meta">Updated <strong>{{ \Illuminate\Support\Carbon::now()->format('M d, Y') }}</strong></span>
-                    </div>
-
-                    <div>
-                        <h1 class="dashboard-title">Dashboard</h1>
-                        <p class="dashboard-subtitle">
-                            Track customers, packages, support, and operations from a single professional command center.
-                        </p>
-                    </div>
-
-                    <div class="dashboard-tabs">
-                        <button type="button" class="dashboard-tab" x-bind:class="tab === 'overview' ? 'is-active' : ''" x-on:click="tab = 'overview'">Overview</button>
-                        <button type="button" class="dashboard-tab" x-bind:class="tab === 'operations' ? 'is-active' : ''" x-on:click="tab = 'operations'">Operations</button>
-                        <button type="button" class="dashboard-tab" x-bind:class="tab === 'support' ? 'is-active' : ''" x-on:click="tab = 'support'">Support</button>
-                    </div>
-
-                    <div class="dashboard-hero__footnote">
-                        <span class="dashboard-hero__footnote-item"><span class="dashboard-hero__footnote-dot"></span>Clean reporting</span>
-                        <span class="dashboard-hero__footnote-item"><span class="dashboard-hero__footnote-dot"></span>Fast actions</span>
-                        <span class="dashboard-hero__footnote-item"><span class="dashboard-hero__footnote-dot"></span>Support visibility</span>
+@php
+    $stats        = $this->getStatsCards();
+    $overview     = $this->getUserOverview();
+    $growth       = $this->getUserGrowth();
+    $recentUsers  = $this->getRecentUsers();
+    $pending      = $this->getPendingActions();
+    $activity     = $this->getRecentActivity();
+    $quickActions = $this->getQuickActions();
+    $onboarding   = $this->getOnboardingProgress();
+    $accountStatus = $this->getAccountStatus();
+
+    $admin      = auth('admin')->user();
+    $adminName  = $admin?->name ?? 'Admin';
+    $today      = \Illuminate\Support\Carbon::now()->format('M j, Y');
+    $weekEnd    = \Illuminate\Support\Carbon::now()->addDays(6)->format('M j, Y');
+
+    $totalUsers = collect($overview)->sum('count');
+
+    $statusColorMap = [
+        'active'         => ['bg' => '#dcfce7', 'text' => '#166534'],
+        'active_waiting' => ['bg' => '#dbeafe', 'text' => '#1e40af'],
+        'pending'        => ['bg' => '#fef9c3', 'text' => '#854d0e'],
+        'registered'     => ['bg' => '#ede9fe', 'text' => '#5b21b6'],
+        'expired'        => ['bg' => '#fee2e2', 'text' => '#991b1b'],
+    ];
+
+    $iconColorMap = [
+        'blue'   => ['bg' => '#eff6ff', 'icon' => '#2563eb'],
+        'green'  => ['bg' => '#f0fdf4', 'icon' => '#16a34a'],
+        'amber'  => ['bg' => '#fffbeb', 'icon' => '#d97706'],
+        'violet' => ['bg' => '#f5f3ff', 'icon' => '#7c3aed'],
+        'rose'   => ['bg' => '#fff1f2', 'icon' => '#e11d48'],
+        'cyan'   => ['bg' => '#ecfeff', 'icon' => '#0891b2'],
+    ];
+
+    $trendUpColor   = '#16a34a';
+    $trendDownColor = '#dc2626';
+@endphp
+
+<style>
+/* ── Base ─────────────────────────────────────────── */
+.tc-dash { font-family: inherit; color: #0f172a; }
+.tc-dash *, .tc-dash *::before, .tc-dash *::after { box-sizing: border-box; }
+
+/* ── Top Bar ─────────────────────────────────────── */
+.tc-topbar {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+.tc-topbar__greeting { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; }
+.tc-topbar__sub { font-size: 0.875rem; color: #64748b; margin: 0.2rem 0 0; }
+.tc-topbar__right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.tc-date-pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid #e2e8f0; border-radius: 0.5rem;
+    background: #fff; padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem; font-weight: 500; color: #334155;
+}
+.tc-export-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: #0f172a; color: #fff; border: none; border-radius: 0.5rem;
+    padding: 0.55rem 1rem; font-size: 0.8125rem; font-weight: 600; cursor: pointer;
+    text-decoration: none; transition: background 150ms;
+}
+.tc-export-btn:hover { background: #1e293b; }
+
+/* ── Stats Grid ──────────────────────────────────── */
+.tc-stats { display: grid; gap: 1rem; grid-template-columns: repeat(2, 1fr); margin-bottom: 1.5rem; }
+@media(min-width:768px)  { .tc-stats { grid-template-columns: repeat(3, 1fr); } }
+@media(min-width:1280px) { .tc-stats { grid-template-columns: repeat(6, 1fr); } }
+
+.tc-stat {
+    background: #fff; border: 1px solid #f1f5f9; border-radius: 0.875rem;
+    padding: 1.1rem 1.1rem 0.9rem; box-shadow: 0 1px 4px rgba(15,23,42,.04);
+    transition: box-shadow 150ms, transform 150ms;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    text-decoration: none; color: inherit;
+}
+.tc-stat:hover { box-shadow: 0 4px 16px rgba(15,23,42,.09); transform: translateY(-2px); }
+.tc-stat__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+.tc-stat__label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .04em; margin: 0; }
+.tc-stat__icon { width: 2.25rem; height: 2.25rem; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tc-stat__value { font-size: 1.75rem; font-weight: 700; letter-spacing: -.03em; color: #0f172a; margin: 0; line-height: 1; }
+.tc-stat__trend { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 600; }
+.tc-stat__trend-note { font-size: 0.7rem; color: #94a3b8; }
+
+/* ── Mid row ─────────────────────────────────────── */
+.tc-mid { display: grid; gap: 1rem; grid-template-columns: 1fr; margin-bottom: 1.5rem; }
+@media(min-width:768px)  { .tc-mid { grid-template-columns: 1fr 1.3fr; } }
+@media(min-width:1280px) { .tc-mid { grid-template-columns: 1fr 1.3fr .85fr; } }
+
+/* ── Cards ───────────────────────────────────────── */
+.tc-card {
+    background: #fff; border: 1px solid #f1f5f9; border-radius: 0.875rem;
+    box-shadow: 0 1px 4px rgba(15,23,42,.04); overflow: hidden;
+}
+.tc-card__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.1rem 0.6rem; gap: 0.5rem;
+}
+.tc-card__title { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin: 0; }
+.tc-card__badge {
+    font-size: 0.7rem; font-weight: 600; color: #64748b;
+    background: #f1f5f9; border-radius: 999px; padding: .2rem .55rem;
+}
+.tc-card__link {
+    font-size: 0.75rem; font-weight: 600; color: #2563eb;
+    text-decoration: none; white-space: nowrap;
+}
+.tc-card__link:hover { text-decoration: underline; }
+.tc-card__body { padding: 0 1.1rem 1.1rem; }
+
+/* ── Donut ───────────────────────────────────────── */
+.tc-donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.9rem; }
+.tc-donut-canvas-wrap { position: relative; width: 150px; height: 150px; margin: 0 auto; }
+.tc-donut-total {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+}
+.tc-donut-total__value { font-size: 1.4rem; font-weight: 700; color: #0f172a; line-height: 1; }
+.tc-donut-total__label { font-size: 0.65rem; color: #94a3b8; margin-top: 0.1rem; }
+.tc-donut-legend { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem .9rem; width: 100%; }
+.tc-donut-legend__item { display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: #475569; }
+.tc-donut-legend__dot { width: .55rem; height: .55rem; border-radius: 50%; flex-shrink: 0; }
+.tc-donut-legend__count { font-weight: 700; color: #0f172a; margin-left: auto; }
+
+/* ── Line chart ──────────────────────────────────── */
+.tc-line-canvas { width: 100%; height: 140px; display: block; }
+
+/* ── Quick Actions ───────────────────────────────── */
+.tc-qa-list { display: grid; gap: .45rem; }
+.tc-qa-item {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .6rem .8rem; border-radius: .6rem; border: 1px solid #f1f5f9;
+    text-decoration: none; color: #0f172a; font-size: .82rem; font-weight: 600;
+    transition: background 120ms, border-color 120ms;
+}
+.tc-qa-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+.tc-qa-item__icon {
+    width: 1.9rem; height: 1.9rem; border-radius: .45rem; background: #f1f5f9;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #475569;
+}
+.tc-qa-arrow { margin-left: auto; color: #cbd5e1; }
+
+/* ── Table ───────────────────────────────────────── */
+.tc-table-wrap { overflow-x: auto; }
+.tc-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.tc-table th {
+    padding: .55rem .9rem; text-align: left; font-size: .7rem; font-weight: 700;
+    color: #94a3b8; text-transform: uppercase; letter-spacing: .05em;
+    border-bottom: 1px solid #f1f5f9; white-space: nowrap; background: #fafafa;
+}
+.tc-table td {
+    padding: .7rem .9rem; border-bottom: 1px solid #f8fafc; color: #334155;
+    vertical-align: middle; white-space: nowrap;
+}
+.tc-table tr:last-child td { border-bottom: none; }
+.tc-table tr:hover td { background: #fafafa; }
+
+/* ── Badge / Avatar ──────────────────────────────── */
+.tc-badge {
+    display: inline-flex; align-items: center; padding: .2rem .55rem;
+    border-radius: 999px; font-size: .7rem; font-weight: 700; line-height: 1.2;
+}
+.tc-avatar {
+    width: 1.9rem; height: 1.9rem; border-radius: 50%; background: #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; font-weight: 700; color: #475569; flex-shrink: 0;
+}
+
+/* ── Bottom row ──────────────────────────────────── */
+.tc-bottom { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media(min-width:1024px) { .tc-bottom { grid-template-columns: 1.4fr 1fr; } }
+
+/* ── Activity feed ───────────────────────────────── */
+.tc-feed { display: grid; gap: .6rem; }
+.tc-feed__item { display: flex; align-items: flex-start; gap: .7rem; }
+.tc-feed__dot {
+    width: 1.9rem; height: 1.9rem; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0; margin-top: .05rem;
+}
+.tc-feed__text { font-size: .82rem; color: #334155; line-height: 1.4; flex: 1; }
+.tc-feed__time { font-size: .72rem; color: #94a3b8; white-space: nowrap; }
+
+/* ── Onboarding Stepper ──────────────────────────── */
+.tc-onboarding-row { display: grid; gap: 1rem; grid-template-columns: 1fr; margin-bottom: 1rem; }
+@media(min-width: 768px) { .tc-onboarding-row { grid-template-columns: 1fr 1fr; } }
+
+.tc-stepper { display: flex; align-items: flex-start; padding: .5rem 0 .1rem; gap: 0; }
+.tc-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.tc-step__connector {
+    flex: 1; height: 2px; background: #e2e8f0; margin-top: .95rem; min-width: .5rem;
+    transition: background 150ms;
+}
+.tc-step__connector--done { background: #0ea5e9; }
+.tc-step__circle {
+    width: 1.9rem; height: 1.9rem; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: .72rem; font-weight: 700;
+    border: 2px solid #e2e8f0; background: #f8fafc; color: #94a3b8;
+    position: relative; z-index: 1; transition: all 150ms; flex-shrink: 0;
+}
+.tc-step__circle--done { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+.tc-step__circle--active { background: #fff; border-color: #0ea5e9; color: #0ea5e9; }
+.tc-step__label {
+    font-size: .67rem; color: #94a3b8; text-align: center;
+    margin-top: .4rem; max-width: 5.5rem; line-height: 1.3;
+}
+.tc-step__label--done { color: #0f172a; font-weight: 600; }
+.tc-step__count { font-size: .62rem; color: #94a3b8; margin-top: .1rem; text-align: center; }
+.tc-step__count--done { color: #0ea5e9; font-weight: 600; }
+
+/* ── Account Status list ─────────────────────────── */
+.tc-status-list { display: grid; gap: .9rem; }
+.tc-status-item { display: flex; align-items: center; gap: .7rem; }
+.tc-status-dot { width: .85rem; height: .85rem; border-radius: 50%; flex-shrink: 0; }
+.tc-status-label { flex: 1; font-size: .84rem; color: #334155; font-weight: 500; }
+.tc-status-note { font-size: .78rem; color: #94a3b8; white-space: nowrap; }
+.tc-status-note--done { color: #16a34a; font-weight: 600; }
+.tc-status-note--partial { color: #d97706; font-weight: 600; }
+</style>
+
+<div class="tc-dash">
+
+    {{-- ── Top bar ── --}}
+    <div class="tc-topbar">
+        <div>
+            <p class="tc-topbar__greeting">Welcome back, {{ $adminName }}! 👋</p>
+            <p class="tc-topbar__sub">Here's what's happening with your platform today.</p>
+        </div>
+        <div class="tc-topbar__right">
+            <span class="tc-date-pill">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                {{ $today }}
+            </span>
+            <a href="{{ \App\Filament\Resources\UserResource::getUrl('index') }}" class="tc-export-btn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 16V4m0 12-4-4m4 4 4-4M3 20h18"/></svg>
+                Export Report
+            </a>
+        </div>
+    </div>
+
+    {{-- ── Stats row ── --}}
+    <div class="tc-stats">
+        @foreach ($stats as $s)
+            @php
+                $ic = $iconColorMap[$s['color']] ?? ['bg'=>'#f1f5f9','icon'=>'#64748b'];
+                $tr = $s['trend'];
+                $trColor = $tr['neutral'] ? '#94a3b8' : ($tr['up'] ? $trendUpColor : $trendDownColor);
+            @endphp
+            @if($s['url'])
+            <a href="{{ $s['url'] }}" class="tc-stat">
+            @else
+            <div class="tc-stat">
+            @endif
+                <div class="tc-stat__top">
+                    <p class="tc-stat__label">{{ $s['label'] }}</p>
+                    <div class="tc-stat__icon" style="background:{{ $ic['bg'] }};color:{{ $ic['icon'] }};">
+                        <x-filament::icon :icon="$s['icon']" class="w-4 h-4" />
                     </div>
                 </div>
+                <p class="tc-stat__value">{{ number_format($s['value']) }}</p>
+                <div>
+                    <div class="tc-stat__trend" style="color:{{ $trColor }};">
+                        @if(!$tr['neutral'])
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                @if($tr['up'])<path d="M18 15l-6-6-6 6"/>@else<path d="M6 9l6 6 6-6"/>@endif
+                            </svg>
+                        @endif
+                        {{ $tr['pct'] }}%
+                    </div>
+                    <div class="tc-stat__trend-note">{{ $s['note'] }}</div>
+                </div>
+            @if($s['url'])</a>@else</div>@endif
+        @endforeach
+    </div>
 
-                <div class="dashboard-hero__stats">
-                    <div class="dashboard-hero__mini">
-                        <p class="dashboard-hero__mini-label">Open tickets</p>
-                        <p class="dashboard-hero__mini-value">{{ $openTickets }}</p>
-                        <p class="dashboard-hero__mini-note">Needs attention from the support team</p>
-                    </div>
-                    <div class="dashboard-hero__mini">
-                        <p class="dashboard-hero__mini-label">Active customers</p>
-                        <p class="dashboard-hero__mini-value">{{ $activeCustomers }}</p>
-                        <p class="dashboard-hero__mini-note">Users currently on an active status</p>
-                    </div>
-                    <div class="dashboard-hero__summary">
-                        <p class="dashboard-hero__summary-title">This month</p>
-                        <div class="dashboard-hero__summary-grid">
-                            @foreach ($highlights as $highlight)
-                                <div class="dashboard-hero__summary-item">
-                                    <p class="dashboard-hero__summary-value">{{ $highlight['value'] }}</p>
-                                    <p class="dashboard-hero__summary-label">{{ $highlight['label'] }}</p>
-                                </div>
-                            @endforeach
+    {{-- ── Charts + Quick Actions ── --}}
+    <div class="tc-mid">
+
+        {{-- User Overview Donut --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">User Overview</h3>
+                <span class="tc-card__badge">All Time</span>
+            </div>
+            <div class="tc-card__body">
+                <div class="tc-donut-wrap">
+                    <div class="tc-donut-canvas-wrap">
+                        <canvas id="donutChart" width="150" height="150"></canvas>
+                        <div class="tc-donut-total">
+                            <span class="tc-donut-total__value">{{ number_format($totalUsers) }}</span>
+                            <span class="tc-donut-total__label">Total</span>
                         </div>
+                    </div>
+                    <div class="tc-donut-legend">
+                        @foreach ($overview as $seg)
+                            <div class="tc-donut-legend__item">
+                                <span class="tc-donut-legend__dot" style="background:{{ $seg['color'] }};"></span>
+                                <span>{{ $seg['label'] }}</span>
+                                <span class="tc-donut-legend__count">{{ number_format($seg['count']) }}</span>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="dashboard-section" x-show="tab === 'overview'" x-transition.opacity>
-            <div class="dashboard-cards">
-                @foreach ($summaryCards as $card)
-                    <article class="dashboard-card">
-                        <div class="dashboard-card__top">
-                            <div>
-                                <p class="dashboard-card__label">{{ $card['label'] }}</p>
-                                <p class="dashboard-card__value">{{ $card['value'] }}</p>
-                                <p class="dashboard-card__detail">{{ $card['detail'] }}</p>
-                            </div>
-                            <div class="dashboard-card__icon" style="background: {{ $cardStyles[$card['color']]['surface'] }}; color: {{ $cardStyles[$card['color']]['color'] }};">
-                                <x-filament::icon :icon="$card['icon']" class="size-6" />
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
+        {{-- Users Growth Line --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">Users Growth <span style="font-size:.75rem;font-weight:500;color:#64748b;">(Last 7 Days)</span></h3>
             </div>
+            <div class="tc-card__body">
+                <canvas id="lineChart" class="tc-line-canvas"></canvas>
+            </div>
+        </div>
 
-            <div style="display:grid;gap:1.5rem;grid-template-columns:repeat(1,minmax(0,1fr));">
-                <section class="dashboard-panel">
-                    <div class="dashboard-panel__header">
-                        <div>
-                            <h2 class="dashboard-panel__title">Recent complaints</h2>
-                            <p class="dashboard-panel__subtitle">Latest support items that need review or follow-up.</p>
-                        </div>
-                        <a href="{{ \App\Filament\Resources\TicketResource::getUrl('index') }}" class="dashboard-button">View all</a>
-                    </div>
+        {{-- Quick Actions --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">Quick Actions</h3>
+            </div>
+            <div class="tc-card__body">
+                <div class="tc-qa-list">
+                    @foreach ($quickActions as $qa)
+                        <a href="{{ $qa['url'] }}" class="tc-qa-item">
+                            <span class="tc-qa-item__icon">
+                                <x-filament::icon :icon="$qa['icon']" class="w-4 h-4" />
+                            </span>
+                            {{ $qa['label'] }}
+                            <svg class="tc-qa-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
 
-                    <div class="dashboard-list">
-                        @forelse ($recentTickets as $ticket)
-                            <div class="dashboard-list__item">
-                                <div>
-                                    <p class="dashboard-list__title">#{{ $ticket['id'] }} {{ $ticket['subject'] }}</p>
-                                    <p class="dashboard-list__meta">{{ $ticket['created_at'] ?? 'Just now' }}</p>
-                                </div>
-                                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;">
-                                    <span class="dashboard-pill dashboard-pill--neutral">{{ ucfirst($ticket['priority'] ?? 'normal') }}</span>
-                                    <span class="dashboard-pill {{ $ticket['status'] === 'open' ? 'dashboard-pill--open' : 'dashboard-pill--resolved' }}">{{ ucfirst($ticket['status'] ?? 'open') }}</span>
-                                </div>
+    </div>
+
+    {{-- ── Onboarding Progress + Account Status ── --}}
+    <div class="tc-onboarding-row">
+
+        {{-- Onboarding Progress --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">Onboarding Progress</h3>
+                <a href="{{ \App\Filament\Resources\UserResource::getUrl('index') }}" class="tc-card__link">View Guide →</a>
+            </div>
+            <div class="tc-card__body" style="padding-top:.3rem;">
+                <div class="tc-stepper">
+                    @foreach ($onboarding['steps'] as $i => $step)
+                        @php $done = $step['count'] > 0; @endphp
+                        {{-- Connector before step (not before first) --}}
+                        @if ($i > 0)
+                            <div class="tc-step__connector {{ $done ? 'tc-step__connector--done' : '' }}"></div>
+                        @endif
+                        <div class="tc-step">
+                            <div class="tc-step__circle {{ $done ? 'tc-step__circle--done' : '' }}">
+                                @if ($done)
+                                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 12l5 5 9-9"/></svg>
+                                @else
+                                    {{ $step['num'] }}
+                                @endif
                             </div>
+                            <div class="tc-step__label {{ $done ? 'tc-step__label--done' : '' }}">{{ $step['label'] }}</div>
+                            <div class="tc-step__count {{ $done ? 'tc-step__count--done' : '' }}">{{ number_format($step['count']) }} users</div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- Account Status --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">Account Status</h3>
+                <span style="{{ $accountStatus['badgeStyle'] }}font-size:.68rem;font-weight:700;padding:.22rem .65rem;border-radius:999px;letter-spacing:.04em;">
+                    {{ $accountStatus['badge'] }}
+                </span>
+            </div>
+            <div class="tc-card__body">
+                <div class="tc-status-list">
+                    @foreach ($accountStatus['items'] as $item)
+                        @php
+                            $dotColor = match($item['status']) {
+                                'done'    => '#22c55e',
+                                'partial' => '#f59e0b',
+                                'none'    => '#f43f5e',
+                                default   => '#cbd5e1',  // pending
+                            };
+                            $noteClass = match($item['status']) {
+                                'done'    => 'tc-status-note--done',
+                                'partial' => 'tc-status-note--partial',
+                                default   => '',
+                            };
+                        @endphp
+                        <div class="tc-status-item">
+                            <div class="tc-status-dot" style="background:{{ $dotColor }};"></div>
+                            <span class="tc-status-label">{{ $item['label'] }}</span>
+                            <span class="tc-status-note {{ $noteClass }}">{{ $item['note'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- ── Recent Users table ── --}}
+    <div class="tc-card" style="margin-bottom:1rem;">
+        <div class="tc-card__header">
+            <h3 class="tc-card__title">Recent Users</h3>
+            <a href="{{ \App\Filament\Resources\UserResource::getUrl('index') }}" class="tc-card__link">View All →</a>
+        </div>
+        <div class="tc-table-wrap">
+            <table class="tc-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($recentUsers as $u)
+                        @php $sc = $statusColorMap[$u['status']] ?? ['bg'=>'#f1f5f9','text'=>'#475569']; @endphp
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:.6rem;">
+                                    <div class="tc-avatar">{{ $u['initials'] }}</div>
+                                    <span style="font-weight:600;">{{ $u['name'] }}</span>
+                                </div>
+                            </td>
+                            <td style="color:#64748b;">{{ $u['email'] }}</td>
+                            <td>
+                                <span class="tc-badge" style="background:{{ $sc['bg'] }};color:{{ $sc['text'] }};">
+                                    {{ ucfirst(str_replace('_',' ',$u['status'])) }}
+                                </span>
+                            </td>
+                            <td style="color:#64748b;">{{ $u['joined'] }}</td>
+                            <td><a href="{{ $u['url'] }}" style="font-size:.75rem;font-weight:600;color:#2563eb;text-decoration:none;">Edit</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" style="text-align:center;padding:1.5rem;color:#94a3b8;">No users yet.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- ── Pending Actions + Activity ── --}}
+    <div class="tc-bottom">
+
+        {{-- Pending Actions --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">Pending Actions</h3>
+                <span class="tc-card__badge">{{ count($pending) }} items</span>
+            </div>
+            <div class="tc-table-wrap">
+                <table class="tc-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Details</th>
+                            <th>User</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($pending as $pa)
+                            @php
+                                $pColor = $pa['color'] === 'amber'
+                                    ? ['bg'=>'#fffbeb','text'=>'#92400e']
+                                    : ['bg'=>'#fff1f2','text'=>'#9f1239'];
+                            @endphp
+                            <tr>
+                                <td><span class="tc-badge" style="background:{{ $pColor['bg'] }};color:{{ $pColor['text'] }};">{{ $pa['type'] }}</span></td>
+                                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;">{{ $pa['detail'] }}</td>
+                                <td>{{ $pa['user'] }}</td>
+                                <td style="color:#64748b;">{{ $pa['date'] }}</td>
+                                <td><a href="{{ $pa['url'] }}" style="font-size:.75rem;font-weight:600;color:#2563eb;text-decoration:none;">{{ $pa['action'] }}</a></td>
+                            </tr>
                         @empty
-                            <div class="dashboard-list__item">
-                                <div>
-                                    <p class="dashboard-list__title">No tickets yet</p>
-                                    <p class="dashboard-list__meta">Support activity will appear here once customers start submitting requests.</p>
-                                </div>
-                            </div>
+                            <tr><td colspan="5" style="text-align:center;padding:1.5rem;color:#94a3b8;">No pending actions 🎉</td></tr>
                         @endforelse
-                    </div>
-                </section>
-
-                <section class="dashboard-panel">
-                    <h2 class="dashboard-panel__title">Quick actions</h2>
-                    <p class="dashboard-panel__subtitle">Shortcuts to the most common admin areas.</p>
-
-                    <div class="dashboard-quick-grid">
-                        @foreach ($quickActions as $action)
-                            <a href="{{ $action['url'] }}" class="dashboard-quick-link">
-                                <div class="dashboard-quick-link__icon">
-                                    <x-filament::icon :icon="$action['icon']" class="size-5" />
-                                </div>
-                                <div style="min-width:0;flex:1;">
-                                    <p class="dashboard-quick-link__title">{{ $action['label'] }}</p>
-                                    <p class="dashboard-quick-link__description">{{ $action['description'] }}</p>
-                                </div>
-                                <div style="color:#94a3b8;flex-shrink:0;">
-                                    <x-filament::icon icon="heroicon-o-arrow-right" class="size-4" />
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </section>
+                    </tbody>
+                </table>
             </div>
-        </section>
+        </div>
 
-        <section class="dashboard-section" x-show="tab === 'operations'" x-transition.opacity style="display:none;">
-            <div class="dashboard-cards">
-                <article class="dashboard-card">
-                    <div class="dashboard-card__top">
-                        <div>
-                            <p class="dashboard-card__label">Customers</p>
-                            <p class="dashboard-card__value">{{ $summaryCards[0]['value'] }}</p>
-                            <p class="dashboard-card__detail">Use this to track overall account growth.</p>
-                        </div>
-                    </div>
-                </article>
-                <article class="dashboard-card">
-                    <div class="dashboard-card__top">
-                        <div>
-                            <p class="dashboard-card__label">Packages</p>
-                            <p class="dashboard-card__value">{{ $summaryCards[3]['value'] }}</p>
-                            <p class="dashboard-card__detail">Active catalog items ready for customers.</p>
-                        </div>
-                    </div>
-                </article>
-                <article class="dashboard-card">
-                    <div class="dashboard-card__top">
-                        <div>
-                            <p class="dashboard-card__label">Plans</p>
-                            <p class="dashboard-card__value">{{ $summaryCards[1]['value'] }}</p>
-                            <p class="dashboard-card__detail">Currently active customer packages.</p>
-                        </div>
-                    </div>
-                </article>
-                <article class="dashboard-card">
-                    <div class="dashboard-card__top">
-                        <div>
-                            <p class="dashboard-card__label">Countries</p>
-                            <p class="dashboard-card__value">{{ $highlights[3]['value'] }}</p>
-                            <p class="dashboard-card__detail">Regions available in the platform.</p>
-                        </div>
-                    </div>
-                </article>
+        {{-- Recent Activity --}}
+        <div class="tc-card">
+            <div class="tc-card__header">
+                <h3 class="tc-card__title">Recent Activity</h3>
+                <span class="tc-card__badge">Latest</span>
             </div>
-
-            <div style="display:grid;gap:1.5rem;grid-template-columns:repeat(1,minmax(0,1fr));">
-                <section class="dashboard-panel">
-                    <div class="dashboard-panel__header">
-                        <div>
-                            <h2 class="dashboard-panel__title">Operations shortcuts</h2>
-                            <p class="dashboard-panel__subtitle">High-frequency links for daily admin work.</p>
-                        </div>
-                        <span class="dashboard-pill dashboard-pill--neutral">5 quick links</span>
-                    </div>
-
-                    <div class="dashboard-quick-grid" style="margin-top:1rem;">
-                        @foreach ($quickActions as $action)
-                            <a href="{{ $action['url'] }}" class="dashboard-quick-link">
-                                <div class="dashboard-quick-link__icon">
-                                    <x-filament::icon :icon="$action['icon']" class="size-5" />
-                                </div>
-                                <div style="min-width:0;flex:1;">
-                                    <p class="dashboard-quick-link__title">{{ $action['label'] }}</p>
-                                    <p class="dashboard-quick-link__description">{{ $action['description'] }}</p>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </section>
-
-                <section class="dashboard-panel">
-                    <h2 class="dashboard-panel__title">Monthly summary</h2>
-                    <div class="dashboard-metrics" style="margin-top:1rem;">
-                        @foreach ($highlights as $highlight)
-                            <div class="dashboard-metric">
-                                <p class="dashboard-metric__label">{{ $highlight['label'] }}</p>
-                                <p class="dashboard-metric__value">{{ $highlight['value'] }}</p>
+            <div class="tc-card__body" style="padding-top:.3rem;">
+                <div class="tc-feed">
+                    @forelse ($activity as $item)
+                        @php
+                            $dotMap = ['blue'=>['bg'=>'#eff6ff','ic'=>'#3b82f6'],'green'=>['bg'=>'#f0fdf4','ic'=>'#22c55e'],'rose'=>['bg'=>'#fff1f2','ic'=>'#f43f5e'],'amber'=>['bg'=>'#fffbeb','ic'=>'#f59e0b']];
+                            $dc = $dotMap[$item['color']] ?? ['bg'=>'#f1f5f9','ic'=>'#94a3b8'];
+                        @endphp
+                        <div class="tc-feed__item">
+                            <div class="tc-feed__dot" style="background:{{ $dc['bg'] }};color:{{ $dc['ic'] }};">
+                                @if($item['icon'] === 'user')
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                @elseif($item['icon'] === 'package')
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                                @elseif($item['icon'] === 'ticket')
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                @else
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+                                @endif
                             </div>
-                        @endforeach
-                    </div>
-                </section>
-            </div>
-        </section>
-
-        <section class="dashboard-section dashboard-support" x-show="tab === 'support'" x-transition.opacity style="display:none;">
-            <section class="dashboard-panel">
-                <div class="dashboard-panel__header">
-                    <div>
-                        <h2 class="dashboard-panel__title">Support pipeline</h2>
-                        <p class="dashboard-panel__subtitle">Keep unresolved requests visible and easy to prioritise.</p>
-                    </div>
-                    <a href="{{ \App\Filament\Resources\TicketResource::getUrl('index') }}" class="dashboard-button">Open support</a>
-                </div>
-
-                <div class="dashboard-metrics" style="margin-top:1rem;">
-                    <div class="dashboard-metric" style="background:rgba(244,63,94,0.06);">
-                        <p class="dashboard-metric__label">Open tickets</p>
-                        <p class="dashboard-metric__value" style="color:#be123c;">{{ $openTickets }}</p>
-                    </div>
-                    <div class="dashboard-metric" style="background:rgba(16,185,129,0.06);">
-                        <p class="dashboard-metric__label">Active customers</p>
-                        <p class="dashboard-metric__value" style="color:#047857;">{{ $activeCustomers }}</p>
-                    </div>
-                </div>
-
-                <div class="dashboard-list" style="margin-top:1rem;">
-                    @forelse ($recentTickets as $ticket)
-                        <div class="dashboard-list__item">
-                            <div>
-                                <p class="dashboard-list__title">{{ $ticket['subject'] }}</p>
-                                <p class="dashboard-list__meta">Ticket #{{ $ticket['id'] }} · {{ $ticket['created_at'] ?? 'Recently' }}</p>
+                            <div style="flex:1;min-width:0;">
+                                <p class="tc-feed__text">{{ $item['text'] }}</p>
                             </div>
-                            <span class="dashboard-pill {{ $ticket['status'] === 'open' ? 'dashboard-pill--open' : 'dashboard-pill--resolved' }}">{{ ucfirst($ticket['status'] ?? 'open') }}</span>
+                            <span class="tc-feed__time">{{ $item['time'] }}</span>
                         </div>
                     @empty
-                        <div class="dashboard-list__item">
-                            <div>
-                                <p class="dashboard-list__title">No tickets available yet</p>
-                                <p class="dashboard-list__meta">Once support requests arrive, they will appear here.</p>
-                            </div>
-                        </div>
+                        <p style="font-size:.82rem;color:#94a3b8;text-align:center;padding:.5rem 0;">No recent activity.</p>
                     @endforelse
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <section class="dashboard-support__focus">
-                <p class="dashboard-support__focus-label">Support focus</p>
-                <p class="dashboard-support__focus-value">Same day</p>
-                <p style="margin-top:0.5rem;color:rgba(226,232,240,0.78);line-height:1.6;">
-                    The dashboard keeps service work visible without overwhelming the layout.
-                </p>
-            </section>
-        </section>
     </div>
+
+</div>
+
+{{-- ── Chart.js ── --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const donutData = @json(array_values($overview));
+    const donutCtx  = document.getElementById('donutChart');
+    if (donutCtx) {
+        new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: donutData.map(d => d.label),
+                datasets: [{
+                    data: donutData.map(d => d.count),
+                    backgroundColor: donutData.map(d => d.color),
+                    borderWidth: 2, borderColor: '#fff', hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed.toLocaleString() } }
+                },
+                responsive: true, maintainAspectRatio: true
+            }
+        });
+    }
+
+    const growthData = @json($growth);
+    const lineCtx    = document.getElementById('lineChart');
+    if (lineCtx) {
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: growthData.labels,
+                datasets: [{
+                    label: 'New Users',
+                    data: growthData.data,
+                    fill: true,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,.1)',
+                    borderWidth: 2, tension: 0.4,
+                    pointRadius: 4, pointBackgroundColor: '#22c55e',
+                    pointBorderColor: '#fff', pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94a3b8' } },
+                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, color: '#94a3b8', stepSize: 1 }, beginAtZero: true }
+                }
+            }
+        });
+    }
+})();
+</script>
 </x-filament-panels::page>

@@ -4,15 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers\UserPackagesRelationManager;
-use App\Models\Package;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
@@ -20,16 +19,15 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Facades\DB;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
-    protected static \UnitEnum|string|null $navigationGroup = 'Users';
-    protected static ?string $navigationLabel = 'Customers';
-    protected static ?int $navigationSort = 2;
+    protected static \UnitEnum|string|null $navigationGroup = 'User Management';
+    protected static ?string $navigationLabel = 'All Customers';
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -65,18 +63,18 @@ class UserResource extends Resource
                     ->columnSpan(['default' => 1, 'lg' => 2]),
                 Section::make('Account status')
                     ->icon('heroicon-o-signal')
-                    ->description('Current lifecycle state of this account.')
+                    ->description('Managed automatically from this customer\'s package records.')
                     ->schema([
-                        Select::make('status')
-                            ->options([
-                                'registered' => 'Registered',
-                                'pending' => 'Pending Verify',
-                                'active' => 'Active',
-                                'expired' => 'Expired',
-                            ])
-                            ->default('registered')
-                            ->required()
-                            ->helperText('Controls what the customer can access.')
+                        Placeholder::make('effective_status')
+                            ->label('Current account status')
+                            ->content(function (?User $record): string {
+                                if (! $record) {
+                                    return 'Registered';
+                                }
+
+                                return ucfirst(str_replace('_', ' ', $record->effective_status));
+                            })
+                            ->helperText('Update the package records below on the Edit Customer page to change this status.')
                             ->columnSpanFull(),
                     ])
                     ->columnSpan(['default' => 1, 'lg' => 1]),
@@ -104,7 +102,7 @@ class UserResource extends Resource
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('status')
-                ->state(fn (User $record): string => $record->has_active_package ? 'active' : (string) $record->status)
+                ->state(fn (User $record): string => $record->effective_status)
                 ->badge()
                 ->color(fn (string $state): string => match ($state) {
                     'active' => 'success',
@@ -188,131 +186,15 @@ class UserResource extends Resource
                 }),
         ])
         ->recordActions([
-            \Filament\Actions\EditAction::make(),
+            Action::make('editPackageDetails')
+                ->label('Package Details')
+                ->icon('heroicon-o-credit-card')
+                ->color('gray')
+                ->url(fn (User $record): string => static::getUrl('edit', ['record' => $record]))
+                ->tooltip('Open the customer and manage package details in the package panel.'),
+            EditAction::make()
+                ->label('Edit Customer'),
             \Filament\Actions\DeleteAction::make(),
-            Action::make('changeStatus')
-                ->label('Change Status')
-                ->icon('heroicon-m-arrows-right-left')
-                ->modalHeading('Change Customer Status')
-                ->modalDescription('When setting status to Active, select a package to assign immediately.')
-                ->fillForm(function (User $record): array {
-                    $activePackageId = $record->userPackages()
-                        ->whereIn('status', ['active', 'active_waiting'])
-                        ->latest('id')
-                        ->value('package_id');
-
-                    return [
-                        'status' => $activePackageId ? 'active' : $record->status,
-                        'package_id' => $activePackageId,
-                    ];
-                })
-                ->form([
-                    Select::make('status')
-                        ->live()
-                        ->options([
-                            'registered' => 'Registered',
-                            'pending' => 'Pending Verify',
-                            'active' => 'Active',
-                            'expired' => 'Expired',
-                        ])
-                        ->required(),
-                    Select::make('package_id')
-                        ->label('Assign Package')
-                        ->options(fn (): array => Package::query()
-                            ->where('is_active', true)
-                            ->orderBy('price')
-                            ->pluck('name', 'id')
-                            ->toArray())
-                        ->searchable()
-                        ->preload()
-                        ->helperText('Required only when status is set to Active.')
-                        ->visible(fn (callable $get): bool => $get('status') === 'active')
-                        ->required(fn (callable $get): bool => $get('status') === 'active'),
-                    Placeholder::make('expire_warning')
-                        ->label('')
-                        ->content(function (User $record, callable $get): HtmlString {
-                            if ($get('status') !== 'expired') {
-                                return new HtmlString('');
-                            }
-
-                            $activePackages = $record->userPackages()
-                                ->with('package')
-                                ->whereIn('status', ['active', 'active_waiting'])
-                                ->latest('id')
-                                ->get();
-
-                            if ($activePackages->isEmpty()) {
-                                return new HtmlString(
-                                    '<div style="padding:10px 12px;border-radius:10px;border:1px solid #f59e0b;background:#fff7ed;color:#9a3412;font-weight:600;">No active package is currently assigned to this user.</div>'
-                                );
-                            }
-
-                            $items = $activePackages
-                                ->map(function ($userPackage): string {
-                                    $name = e($userPackage->package?->name ?? ('Package #' . $userPackage->package_id));
-                                    $status = e((string) $userPackage->status);
-
-                                    return "- {$name} ({$status})";
-                                })
-                                ->implode('<br>');
-
-                            return new HtmlString(
-                                '<div style="padding:10px 12px;border-radius:10px;border:1px solid #fca5a5;background:#fef2f2;color:#991b1b;">'
-                                . '<strong>Expiring this user will also expire these package records:</strong><br>'
-                                . $items
-                                . '</div>'
-                            );
-                        })
-                        ->visible(fn (callable $get): bool => $get('status') === 'expired'),
-                ])
-                ->action(function (User $record, array $data): void {
-                    DB::transaction(function () use ($record, $data): void {
-                        $newStatus = (string) ($data['status'] ?? 'registered');
-
-                        $record->status = $newStatus;
-                        $record->save();
-
-                        if ($newStatus === 'expired') {
-                            $record->userPackages()
-                                ->whereIn('status', ['active', 'active_waiting'])
-                                ->update(['status' => 'expired']);
-
-                            return;
-                        }
-
-                        if ($newStatus !== 'active') {
-                            return;
-                        }
-
-                        $packageId = (int) ($data['package_id'] ?? 0);
-
-                        if ($packageId <= 0) {
-                            return;
-                        }
-
-                        $activeUserPackage = $record->userPackages()
-                            ->whereIn('status', ['active', 'active_waiting'])
-                            ->latest('id')
-                            ->first();
-
-                        if ($activeUserPackage) {
-                            $activeUserPackage->update([
-                                'package_id' => $packageId,
-                                'status' => 'active',
-                            ]);
-
-                            return;
-                        }
-
-                        $package = Package::query()->find($packageId);
-
-                        $record->userPackages()->create([
-                            'package_id' => $packageId,
-                            'status' => 'active',
-                            'equity' => $package?->price,
-                        ]);
-                    });
-                }),
         ])
         ->emptyStateHeading('No customers yet')
         ->emptyStateDescription('Add the first customer account manually or wait for registrations.')

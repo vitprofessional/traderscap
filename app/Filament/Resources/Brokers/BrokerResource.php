@@ -20,9 +20,9 @@ class BrokerResource extends Resource
     protected static ?string $model = Broker::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;
-    protected static \UnitEnum|string|null $navigationGroup = 'Catalog';
-    protected static ?string $navigationLabel = 'Brokers';
-    protected static ?int $navigationSort = 4;
+    protected static \UnitEnum|string|null $navigationGroup = 'Quiz & Brokers';
+    protected static ?string $navigationLabel = 'Recommended Brokers';
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'name';
 

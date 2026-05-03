@@ -330,11 +330,17 @@
                     <a href="#" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700">View Guide</a>
                 </div>
                 <?php
+                    $hasPkgAssigned  = $userPackages->isNotEmpty();
+                    $hasMt4Submitted = $userPackages->contains(
+                        fn($p) => !empty($p->trading_id) && !empty($p->trading_password)
+                    );
+                    $isActivated = $hasActivePlan; // already computed above
+
                     $steps = [
-                        ['num'=>1,'label'=>'Choose Path','done'=>true],
-                        ['num'=>2,'label'=>'Open/Fund Account','done'=>false],
-                        ['num'=>3,'label'=>'Submit MT4/MT5 Details','done'=>false],
-                        ['num'=>4,'label'=>'Account Activated','done'=>false],
+                        ['num'=>1,'label'=>'Choose Path',            'done'=>true],
+                        ['num'=>2,'label'=>'Open/Fund Account',      'done'=>$hasPkgAssigned],
+                        ['num'=>3,'label'=>'Submit MT4/MT5 Details', 'done'=>$hasMt4Submitted],
+                        ['num'=>4,'label'=>'Account Activated',      'done'=>$isActivated],
                     ];
                 ?>
                 <div class="flex items-start justify-between gap-1">
@@ -361,9 +367,25 @@
             <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-slate-900">Account Status</h3>
-                    <span class="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 rounded-full px-2.5 py-0.5 uppercase tracking-wide">Pending</span>
+                    <?php
+                        if ($isActivated) {
+                            $statusBadgeClass = 'text-emerald-700 bg-emerald-100 border-emerald-200';
+                            $statusBadgeText  = 'Active';
+                        } elseif ($hasPkgAssigned) {
+                            $statusBadgeClass = 'text-amber-700 bg-amber-100 border-amber-200';
+                            $statusBadgeText  = 'Pending';
+                        } else {
+                            $statusBadgeClass = 'text-slate-600 bg-slate-100 border-slate-200';
+                            $statusBadgeText  = 'Registered';
+                        }
+                    ?>
+                    <span class="text-[10px] font-bold <?php echo e($statusBadgeClass); ?> border rounded-full px-2.5 py-0.5 uppercase tracking-wide">
+                        <?php echo e($statusBadgeText); ?>
+
+                    </span>
                 </div>
                 <ul class="space-y-3">
+                    
                     <li class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <span class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -372,23 +394,45 @@
                             <span class="text-sm text-slate-700">Registration Completed</span>
                         </div>
                     </li>
+                    
                     <li class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                            </span>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasMt4Submitted): ?>
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                </span>
+                            <?php else: ?>
+                                <span class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                </span>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <span class="text-sm text-slate-700">MT4/MT5 Details</span>
                         </div>
-                        <span class="text-xs text-slate-400">Not Submitted</span>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasMt4Submitted): ?>
+                            <span class="text-xs font-semibold text-emerald-600">Submitted</span>
+                        <?php else: ?>
+                            <span class="text-xs text-slate-400">Not Submitted</span>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </li>
+                    
                     <li class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                            </span>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isActivated): ?>
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                </span>
+                            <?php else: ?>
+                                <span class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                </span>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <span class="text-sm text-slate-700">Activation</span>
                         </div>
-                        <span class="text-xs text-slate-400">Pending</span>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isActivated): ?>
+                            <span class="text-xs font-semibold text-emerald-600">Active</span>
+                        <?php else: ?>
+                            <span class="text-xs text-slate-400">Pending</span>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </li>
                 </ul>
             </div>

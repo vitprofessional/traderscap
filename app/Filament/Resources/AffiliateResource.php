@@ -22,9 +22,9 @@ class AffiliateResource extends Resource
     protected static ?string $model = Affiliate::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
-    protected static \UnitEnum|string|null $navigationGroup = 'Users';
+    protected static \UnitEnum|string|null $navigationGroup = 'User Management';
     protected static ?string $navigationLabel = 'Affiliates';
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

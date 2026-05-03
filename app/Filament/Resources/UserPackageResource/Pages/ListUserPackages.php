@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserPackageResource\Pages;
 
+use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserPackageResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -11,6 +12,11 @@ use Illuminate\Contracts\Support\Htmlable;
 class ListUserPackages extends ListRecords
 {
     protected static string $resource = UserPackageResource::class;
+
+    public function mount(): void
+    {
+        $this->redirect(UserResource::getUrl('index'));
+    }
 
     protected ?string $subheading = 'Track all active and past package subscriptions across your customer base.';
 

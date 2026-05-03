@@ -11,6 +11,22 @@ class UserPackage extends Model
 
     protected $table = 'user_packages';
 
+    /**
+     * Automatically sync the parent user's status whenever a package
+     * record is created, updated, or deleted.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        $sync = function (self $up): void {
+            optional($up->user)->syncStatus();
+        };
+
+        static::saved($sync);
+        static::deleted($sync);
+    }
+
     protected $fillable = [
         'user_id',
         'package_id',

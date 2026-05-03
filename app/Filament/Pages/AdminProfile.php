@@ -16,7 +16,9 @@ class AdminProfile extends Page
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static ?string $navigationLabel = 'Profile';
+    protected static ?string $navigationLabel = 'My Profile';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings & Others';
 
     protected static ?int $navigationSort = 99;
 

@@ -12,7 +12,7 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected ?string $subheading = 'Update this customer\'s profile details, email address, or account status.';
+    protected ?string $subheading = 'Update this customer\'s profile and manage package details from the relation panel below.';
 
     public function getTitle(): string|Htmlable
     {
