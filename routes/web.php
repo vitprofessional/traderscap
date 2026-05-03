@@ -133,6 +133,26 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [CustomerProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
     Route::post('/profile/password', [CustomerProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Email verification
+    Route::get('/email/verify', [\App\Http\Controllers\CustomerEmailVerificationController::class, 'notice'])
+        ->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\CustomerEmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [\App\Http\Controllers\CustomerEmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
+    // Pending email change verification
+    Route::get('/email/change/verify/{id}/{hash}', [\App\Http\Controllers\CustomerProfileController::class, 'verifyPendingEmail'])
+        ->middleware('signed')
+        ->name('verification.email-change.verify');
+    Route::post('/email/change/cancel', [\App\Http\Controllers\CustomerProfileController::class, 'cancelPendingEmail'])
+        ->name('verification.email-change.cancel');
+    Route::post('/email/change/resend', [\App\Http\Controllers\CustomerProfileController::class, 'resendPendingEmailChange'])
+        ->middleware('throttle:6,1')
+        ->name('verification.email-change.resend');
     
     // Customer complaints/ticketing
     Route::get('/complaints', [\App\Http\Controllers\CustomerComplaintController::class,'index'])->name('complaints');
