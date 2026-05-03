@@ -137,7 +137,7 @@
                         <div class="flex items-center justify-center rounded-xl bg-slate-50 h-28">
                             <svg class="w-16 h-16 text-cyan-200" viewBox="0 0 80 60" fill="none"><rect x="4" y="4" width="72" height="52" rx="6" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="2"/><rect x="14" y="14" width="52" height="32" rx="3" fill="white" stroke="#bae6fd" stroke-width="1.5"/><rect x="20" y="20" width="8" height="6" rx="1" fill="#0ea5e9"/><rect x="32" y="20" width="8" height="6" rx="1" fill="#7dd3fc"/><rect x="44" y="20" width="8" height="6" rx="1" fill="#bae6fd"/><circle cx="58" cy="38" r="8" fill="#0ea5e9"/><path d="M54 38l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
                         </div>
-                        <a href="{{ route('profile') }}" class="flex items-center justify-center gap-2 w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-4 py-3 transition-colors">
+                        <a href="{{ route('investment-plans.submit-details') }}" class="flex items-center justify-center gap-2 w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-4 py-3 transition-colors">
                             Submit MT4/MT5 Details
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
