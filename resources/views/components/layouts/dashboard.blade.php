@@ -33,7 +33,7 @@
                     'GET STARTED' => [
                         ['route'=>'dashboard','label'=>'Dashboard','icon'=>'home'],
                         ['route'=>'investment-plans','label'=>'Start Here','icon'=>'rocket'],
-                        ['route'=>'investment-plans','label'=>'Submit MT4 Details','icon'=>'monitor'],
+                        ['route'=>'investment-plans.submit-details','label'=>'Submit MT4/MT5 Details','icon'=>'monitor'],
                         ['route'=>'find-broker','label'=>'Brokers','icon'=>'building'],
                     ],
                     'MANAGE' => [
@@ -56,11 +56,11 @@
                 <ul class="space-y-0.5">
                     @foreach($items as $it)
                         @php
-                            $isActive = request()->routeIs($it['route'].'*') && !($it['label'] === 'Start Here' && request()->routeIs('dashboard')) && !($it['label'] === 'Submit MT4 Details');
+                            $isActive = request()->routeIs($it['route'].'*') && !($it['label'] === 'Start Here' && request()->routeIs('dashboard')) && !($it['label'] === 'Submit MT4/MT5 Details');
                             // Refine active check for dashboard specifically
                             if ($it['label'] === 'Dashboard') $isActive = request()->routeIs('dashboard');
                             if ($it['label'] === 'Start Here') $isActive = false;
-                            if ($it['label'] === 'Submit MT4 Details') $isActive = false;
+                            if ($it['label'] === 'Submit MT4/MT5 Details') $isActive = false;
                             $routeUrl = route($it['route']);
                             $locked = $it['locked'] ?? false;
                         @endphp

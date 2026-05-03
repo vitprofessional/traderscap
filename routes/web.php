@@ -116,6 +116,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/my-plans/{userPackage}/cancel', [\App\Http\Controllers\CustomerPackageController::class, 'cancel'])->name('my-plans.cancel');
     Route::post('/my-plans/{userPackage}/renew', [\App\Http\Controllers\CustomerPackageController::class, 'renew'])->name('my-plans.renew');
     Route::get('/investment-plans', [\App\Http\Controllers\InvestmentPlanController::class, 'index'])->name('investment-plans');
+    Route::get('/submit-broker-details', [\App\Http\Controllers\InvestmentPlanController::class, 'submitDetailsShortcut'])->name('investment-plans.submit-details');
     Route::get('/investment-plans/{package}/request', [\App\Http\Controllers\InvestmentPlanController::class, 'requestForm'])->name('investment-plans.request');
     Route::post('/investment-plans/{package}/request', [\App\Http\Controllers\InvestmentPlanController::class, 'submitRequest'])->name('investment-plans.request.submit');
     Route::get('/custom-best-broker', [BrokerFinderController::class, 'chooser'])->name('custom-best-broker');

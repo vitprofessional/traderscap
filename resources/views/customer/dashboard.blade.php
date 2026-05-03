@@ -78,12 +78,20 @@
         <p class="text-sm text-emerald-800 font-medium">We trade on your account with investor (read-only) access. You stay in control. Your funds are safe.</p>
     </div>
 
+    @php
+        $activeStatuses = ['active', 'active_waiting'];
+        $hasActivePlan = $userPackages->contains(
+            fn ($userPackage) => in_array(strtolower((string) $userPackage->status), $activeStatuses, true)
+        );
+    @endphp
+
 {{-- ── Main 2-col grid ── --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
         {{-- Left / Main column --}}
         <div class="xl:col-span-2 space-y-6">
 
+            @if($hasActivePlan)
             {{-- Stats Row --}}
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 @foreach([
@@ -111,7 +119,9 @@
                 </div>
                 @endforeach
             </div>
+            @endif
 
+            @if(! $hasActivePlan)
             {{-- Choose Your Path --}}
             <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-100">
@@ -122,18 +132,18 @@
                     {{-- Card 1: Have account --}}
                     <div class="p-6 flex flex-col gap-4">
                         <span class="inline-block text-[10px] font-bold uppercase tracking-widest text-cyan-600 bg-cyan-50 border border-cyan-100 rounded-full px-3 py-1 w-fit">I Have a Trading Account</span>
-                        <h3 class="text-lg font-bold text-slate-900">Submit MT4 Details</h3>
-                        <p class="text-sm text-slate-500 flex-1">Already have a trading account? Submit your MT4 details to activate managed trading.</p>
+                        <h3 class="text-lg font-bold text-slate-900">Submit MT4/MT5 Details</h3>
+                        <p class="text-sm text-slate-500 flex-1">Already have a trading account? Submit your MT4/MT5 details to activate managed trading.</p>
                         <div class="flex items-center justify-center rounded-xl bg-slate-50 h-28">
                             <svg class="w-16 h-16 text-cyan-200" viewBox="0 0 80 60" fill="none"><rect x="4" y="4" width="72" height="52" rx="6" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="2"/><rect x="14" y="14" width="52" height="32" rx="3" fill="white" stroke="#bae6fd" stroke-width="1.5"/><rect x="20" y="20" width="8" height="6" rx="1" fill="#0ea5e9"/><rect x="32" y="20" width="8" height="6" rx="1" fill="#7dd3fc"/><rect x="44" y="20" width="8" height="6" rx="1" fill="#bae6fd"/><circle cx="58" cy="38" r="8" fill="#0ea5e9"/><path d="M54 38l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
                         </div>
                         <a href="{{ route('profile') }}" class="flex items-center justify-center gap-2 w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-4 py-3 transition-colors">
-                            Submit MT4 Details
+                            Submit MT4/MT5 Details
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                         <a href="#" class="flex items-center gap-2 text-xs text-slate-500 hover:text-cyan-600 transition-colors">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            How to get MT4 details?
+                            How to get MT4/MT5 details?
                         </a>
                     </div>
 
@@ -141,7 +151,7 @@
                     <div class="p-6 flex flex-col gap-4">
                         <span class="inline-block text-[10px] font-bold uppercase tracking-widest text-slate-600 bg-slate-50 border border-slate-200 rounded-full px-3 py-1 w-fit">I Don't Have a Trading Account</span>
                         <h3 class="text-lg font-bold text-slate-900">Open Account with Preferred Broker</h3>
-                        <p class="text-sm text-slate-500 flex-1">Open a real trading account with our recommended brokers and then submit your MT4 details.</p>
+                        <p class="text-sm text-slate-500 flex-1">Open a real trading account with our recommended brokers and then submit your MT4/MT5 details.</p>
                         <div class="flex items-center justify-center rounded-xl bg-slate-50 h-28">
                             <svg class="w-16 h-16 text-slate-200" viewBox="0 0 80 60" fill="none"><rect x="4" y="4" width="72" height="52" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/><path d="M16 46 L16 14 L40 8 L64 14 L64 46 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/><rect x="28" y="28" width="24" height="18" rx="2" fill="#cbd5e1"/><path d="M34 28 L34 22 Q40 18 46 22 L46 28" stroke="#94a3b8" stroke-width="1.5" fill="none"/></svg>
                         </div>
@@ -157,6 +167,80 @@
                 </div>
             </div>
 
+            @endif
+
+            {{-- Our Investment Plans --}}
+            @if(! $hasActivePlan && $packages->isNotEmpty())
+            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-base font-bold text-slate-900">Our Investment Plans</h2>
+                    <a href="{{ route('investment-plans') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1">View All Plans <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+                </div>
+                <div class="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                    @foreach($packages as $pkg)
+                    <div class="p-5 flex flex-col gap-2 {{ $pkg->is_recommended ? 'bg-cyan-50' : '' }}">
+                        @if($pkg->is_recommended)
+                            <span class="text-[10px] font-bold text-cyan-700 bg-cyan-100 border border-cyan-200 rounded-full px-2 py-0.5 w-fit">Recommended</span>
+                        @endif
+                        <h3 class="font-bold text-slate-900">{{ $pkg->name }}</h3>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-2xl font-extrabold text-slate-900">${{ number_format((float) $pkg->price) }}</span>
+                        </div>
+                        @if($pkg->description)
+                        <p class="text-xs text-slate-500 leading-relaxed">{{ Str::limit($pkg->description, 80) }}</p>
+                        @endif
+                        <a href="{{ route('investment-plans.request', $pkg) }}" class="mt-2 flex items-center justify-center gap-2 rounded-lg {{ $pkg->is_recommended ? 'bg-cyan-600 hover:bg-cyan-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800' }} text-xs font-semibold px-3 py-2 transition-colors">
+                            Get Started
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            {{-- Your Packages Table --}}
+            @if($hasActivePlan && $userPackages->isNotEmpty())
+            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-base font-bold text-slate-900">Your Packages</h2>
+                    <a href="{{ route('investment-plans') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700">+ Buy more</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
+                                <th class="px-5 py-3 text-left font-semibold">Package</th>
+                                <th class="px-5 py-3 text-left font-semibold">Status</th>
+                                <th class="px-5 py-3 text-right font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($userPackages as $up)
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-5 py-3.5 font-medium text-slate-900">{{ $up->package->name ?? '-' }}</td>
+                                <td class="px-5 py-3.5">
+                                    @php $sc = match($up->status) { 'active'=>'emerald', 'pending'=>'amber', default=>'slate' }; @endphp
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-{{ $sc }}-100 text-{{ $sc }}-800">{{ ucfirst($up->status) }}</span>
+                                </td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('my-plans') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700">Manage</a>
+                                        @if($up->status === 'active')
+                                        <form method="POST" action="{{ route('my-plans.cancel', $up) }}" class="inline" onsubmit="return confirm('Cancel this package?');">
+                                            @csrf
+                                            <button type="submit" class="text-xs font-semibold text-rose-500 hover:text-rose-700">Cancel</button>
+                                        </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
             {{-- Top Recommended Brokers --}}
             <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -195,83 +279,6 @@
                 @endif
             </div>
 
-            {{-- Our Investment Plans --}}
-            @if($packages->isNotEmpty())
-            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h2 class="text-base font-bold text-slate-900">Our Investment Plans</h2>
-                    <a href="{{ route('investment-plans') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1">View All Plans <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-                </div>
-                <div class="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                    @foreach($packages as $pkg)
-                    <div class="p-5 flex flex-col gap-2 {{ $pkg->is_recommended ? 'bg-cyan-50' : '' }}">
-                        @if($pkg->is_recommended)
-                            <span class="text-[10px] font-bold text-cyan-700 bg-cyan-100 border border-cyan-200 rounded-full px-2 py-0.5 w-fit">Recommended</span>
-                        @endif
-                        <h3 class="font-bold text-slate-900">{{ $pkg->name }}</h3>
-                        <div class="flex items-baseline gap-1">
-                            <span class="text-2xl font-extrabold text-slate-900">${{ number_format((float) $pkg->price) }}</span>
-                            <span class="text-xs text-slate-500">/ {{ $pkg->duration_type }}</span>
-                        </div>
-                        @if($pkg->description)
-                        <p class="text-xs text-slate-500 leading-relaxed">{{ Str::limit($pkg->description, 80) }}</p>
-                        @endif
-                        <a href="{{ route('investment-plans.request', $pkg) }}" class="mt-2 flex items-center justify-center gap-2 rounded-lg {{ $pkg->is_recommended ? 'bg-cyan-600 hover:bg-cyan-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800' }} text-xs font-semibold px-3 py-2 transition-colors">
-                            Get Started
-                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </a>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
-            {{-- Your Packages Table --}}
-            @if($userPackages->isNotEmpty())
-            <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h2 class="text-base font-bold text-slate-900">Your Packages</h2>
-                    <a href="{{ route('investment-plans') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700">+ Buy more</a>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
-                                <th class="px-5 py-3 text-left font-semibold">Package</th>
-                                <th class="px-5 py-3 text-left font-semibold">Starts</th>
-                                <th class="px-5 py-3 text-left font-semibold">Ends</th>
-                                <th class="px-5 py-3 text-left font-semibold">Status</th>
-                                <th class="px-5 py-3 text-right font-semibold">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @foreach($userPackages as $up)
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-5 py-3.5 font-medium text-slate-900">{{ $up->package->name ?? '-' }}</td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $up->starts_at?->format('M d, Y') ?? '-' }}</td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $up->ends_at?->format('M d, Y') ?? '-' }}</td>
-                                <td class="px-5 py-3.5">
-                                    @php $sc = match($up->status) { 'active'=>'emerald', 'pending'=>'amber', default=>'slate' }; @endphp
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-{{ $sc }}-100 text-{{ $sc }}-800">{{ ucfirst($up->status) }}</span>
-                                </td>
-                                <td class="px-5 py-3.5 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('my-plans') }}" class="text-xs font-semibold text-cyan-600 hover:text-cyan-700">Manage</a>
-                                        @if($up->status === 'active')
-                                        <form method="POST" action="{{ route('my-plans.cancel', $up) }}" class="inline" onsubmit="return confirm('Cancel this package?');">
-                                            @csrf
-                                            <button type="submit" class="text-xs font-semibold text-rose-500 hover:text-rose-700">Cancel</button>
-                                        </form>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @endif
 
             {{-- Bottom Stats Bar --}}
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
@@ -317,7 +324,7 @@
                     $steps = [
                         ['num'=>1,'label'=>'Choose Path','done'=>true],
                         ['num'=>2,'label'=>'Open/Fund Account','done'=>false],
-                        ['num'=>3,'label'=>'Submit MT4 Details','done'=>false],
+                        ['num'=>3,'label'=>'Submit MT4/MT5 Details','done'=>false],
                         ['num'=>4,'label'=>'Account Activated','done'=>false],
                     ];
                 @endphp
@@ -360,7 +367,7 @@
                             <span class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
                                 <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                             </span>
-                            <span class="text-sm text-slate-700">MT4 Details</span>
+                            <span class="text-sm text-slate-700">MT4/MT5 Details</span>
                         </div>
                         <span class="text-xs text-slate-400">Not Submitted</span>
                     </li>

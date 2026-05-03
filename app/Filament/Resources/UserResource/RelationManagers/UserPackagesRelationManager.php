@@ -26,8 +26,6 @@ class UserPackagesRelationManager extends RelationManager
     {
         return $table->columns([
             TextColumn::make('package.name')->label('Package')->searchable(),
-            TextColumn::make('starts_at')->date()->sortable(),
-            TextColumn::make('ends_at')->date()->sortable(),
             TextColumn::make('status')->sortable(),
         ])->actions([
             EditAction::make(),

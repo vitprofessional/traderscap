@@ -44,7 +44,7 @@ class QuizDataSeeder extends Seeder
             'order' => 3,
             'is_active' => true,
         ]);
-        $a3_1 = QuizAnswer::create(['quiz_question_id' => $q3->id, 'text' => 'MetaTrader 4 (MT4)', 'order' => 1]);
+        $a3_1 = QuizAnswer::create(['quiz_question_id' => $q3->id, 'text' => 'MetaTrader 4 (MT4/MT5)', 'order' => 1]);
         $a3_2 = QuizAnswer::create(['quiz_question_id' => $q3->id, 'text' => 'MetaTrader 5 (MT5)', 'order' => 2]);
         $a3_3 = QuizAnswer::create(['quiz_question_id' => $q3->id, 'text' => 'cTrader', 'order' => 3]);
         $a3_4 = QuizAnswer::create(['quiz_question_id' => $q3->id, 'text' => 'WebTrader / Mobile App', 'order' => 4]);
@@ -253,7 +253,7 @@ class QuizDataSeeder extends Seeder
         BrokerMatch::create(['broker_id' => $b6->id, 'quiz_answer_id' => $a2_4->id, 'weight' => 4]); // Interactive Brokers
         BrokerMatch::create(['broker_id' => $b1->id, 'quiz_answer_id' => $a2_4->id, 'weight' => 3]); // FxPro
         
-        // MT4 users
+        // MT4/MT5 users
         BrokerMatch::create(['broker_id' => $b1->id, 'quiz_answer_id' => $a3_1->id, 'weight' => 3]); // FxPro
         BrokerMatch::create(['broker_id' => $b2->id, 'quiz_answer_id' => $a3_1->id, 'weight' => 3]); // IC Markets
         BrokerMatch::create(['broker_id' => $b5->id, 'quiz_answer_id' => $a3_1->id, 'weight' => 3]); // XM

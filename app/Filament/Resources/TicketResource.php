@@ -28,8 +28,8 @@ class TicketResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
     protected static \UnitEnum|string|null $navigationGroup = 'Support';
-    protected static ?string $navigationLabel = 'Complaints';
-    protected static ?int $navigationSort = 20;
+    protected static ?string $navigationLabel = 'Support Tickets';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

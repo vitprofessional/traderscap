@@ -13,7 +13,7 @@ class CreatePackage extends CreateRecord
 {
     protected static string $resource = PackageResource::class;
 
-    protected ?string $subheading = 'Define a new service package with min deposit, duration, and included facilities.';
+    protected ?string $subheading = 'Define a new service package with min deposit and included facilities.';
 
     protected ?string $replacedRecommendedPackageName = null;
 
@@ -60,9 +60,6 @@ class CreatePackage extends CreateRecord
 
     private function normalizePackageData(array $data): array
     {
-        $durationType = (string) ($data['duration_type'] ?? 'monthly');
-        $durationValue = max(1, (int) ($data['duration_value'] ?? 1));
-
         $durationMultipliers = [
             'daily' => 1,
             'weekly' => 7,
@@ -70,9 +67,24 @@ class CreatePackage extends CreateRecord
             'yearly' => 365,
         ];
 
-        $multiplier = $durationMultipliers[$durationType] ?? 30;
+        $rawType = isset($data['duration_type']) ? trim((string) $data['duration_type']) : '';
+        $rawValue = $data['duration_value'] ?? null;
 
-        $data['duration_type'] = array_key_exists($durationType, $durationMultipliers) ? $durationType : 'monthly';
+        $durationType = array_key_exists($rawType, $durationMultipliers) ? $rawType : null;
+        $durationValue = is_numeric($rawValue) ? max(1, (int) $rawValue) : null;
+
+        // Keep duration optional in the form; fallback to schema defaults when omitted.
+        if (! $durationType && ! $durationValue) {
+            $durationType = 'daily';
+            $durationValue = 30;
+        } else {
+            $durationType ??= 'daily';
+            $durationValue ??= 30;
+        }
+
+        $multiplier = $durationMultipliers[$durationType] ?? 1;
+
+        $data['duration_type'] = $durationType;
         $data['duration_value'] = $durationValue;
         $data['duration_days'] = $durationValue * $multiplier;
 

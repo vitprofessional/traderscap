@@ -9,6 +9,7 @@ class CreateCountryShortcut extends Page
 {
     protected static ?string $navigationLabel = 'Create Country';
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static bool $shouldRegisterNavigation = false;
 
     // A simple view is required by Filament pages, but we'll immediately
     // redirect in mount() to the real resource create URL.

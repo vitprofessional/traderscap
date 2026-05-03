@@ -53,6 +53,11 @@ class User extends Authenticatable
         return $this->hasMany(UserPackage::class);
     }
 
+    public function latestUserPackage()
+    {
+        return $this->hasOne(UserPackage::class)->latestOfMany();
+    }
+
     public function affiliate()
     {
         return $this->hasOne(Affiliate::class);

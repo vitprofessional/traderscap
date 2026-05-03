@@ -10,7 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -37,7 +36,7 @@ class PackageResource extends Resource
             ->components([
                 Section::make('Package details')
                     ->icon('heroicon-o-credit-card')
-                    ->description('Define the name, min deposit, duration, and what the package includes.')
+                    ->description('Define the name, min deposit, and what the package includes.')
                     ->schema([
                         TextInput::make('name')
                             ->label('Package name')
@@ -53,23 +52,6 @@ class PackageResource extends Resource
                             ->minValue(0)
                             ->step(0.01)
                             ->placeholder('0.00'),
-                        TextInput::make('duration_value')
-                            ->label('Duration value')
-                            ->numeric()
-                            ->required()
-                            ->default(1)
-                            ->minValue(1)
-                            ->suffix('units'),
-                        Select::make('duration_type')
-                            ->label('Duration type')
-                            ->required()
-                            ->default('monthly')
-                            ->options([
-                                'daily' => 'Daily',
-                                'weekly' => 'Weekly',
-                                'monthly' => 'Monthly',
-                                'yearly' => 'Yearly',
-                            ]),
                         Textarea::make('description')
                             ->label('Package details')
                             ->placeholder('Briefly explain what this package offers.')
@@ -143,8 +125,6 @@ class PackageResource extends Resource
                 ->label('Min deposit')
                 ->money('usd')
                 ->sortable(),
-            TextColumn::make('duration_label')
-                ->label('Duration'),
             TextColumn::make('facilities_count')
                 ->label('Facilities')
                 ->state(fn (Package $record): int => count($record->facilities ?? []))

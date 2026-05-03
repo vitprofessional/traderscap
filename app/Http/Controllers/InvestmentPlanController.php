@@ -38,6 +38,28 @@ class InvestmentPlanController extends Controller
         ]);
     }
 
+    public function submitDetailsShortcut()
+    {
+        $recommendedPackage = Package::where('is_active', true)
+            ->where('is_recommended', true)
+            ->orderBy('price')
+            ->first();
+
+        if (! $recommendedPackage) {
+            $recommendedPackage = Package::where('is_active', true)
+                ->orderBy('price')
+                ->first();
+        }
+
+        if (! $recommendedPackage) {
+            return redirect()
+                ->route('investment-plans')
+                ->with('error', 'No active package is available right now.');
+        }
+
+        return redirect()->route('investment-plans.request', $recommendedPackage);
+    }
+
     public function requestForm(Package $package)
     {
         $user = Auth::user();
@@ -46,26 +68,60 @@ class InvestmentPlanController extends Controller
             return redirect()->route('login');
         }
 
+        $eligibleStatuses = ['pending', 'active_waiting', 'active', 'expired'];
+
         $selectedPackage = Package::where('is_active', true)->findOrFail($package->id);
 
-        $planOptions = Package::where('is_active', true)
+        $activePlans = Package::where('is_active', true)
             ->orderBy('price')
-            ->pluck('name', 'id');
+            ->get();
+
+        $planOptions = $activePlans->pluck('name', 'id');
 
         $latestStatus = $user->userPackages()
-            ->whereIn('status', ['pending', 'active_waiting', 'active', 'expired'])
+            ->whereIn('status', $eligibleStatuses)
             ->latest()
             ->value('status');
 
         // Get existing package data for pre-filling form during upgrade/downgrade
         $existingPackage = $user->userPackages()
-            ->whereIn('status', ['pending', 'active_waiting', 'active', 'expired'])
+            ->whereIn('status', $eligibleStatuses)
             ->latest()
             ->first();
+
+        $latestPackageRecordsByPackage = $user->userPackages()
+            ->whereIn('status', $eligibleStatuses)
+            ->whereNotNull('package_id')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('package_id')
+            ->map(fn ($items) => $items->first());
+
+        $planMeta = $activePlans->mapWithKeys(function (Package $plan) use ($latestPackageRecordsByPackage) {
+            $packageRecord = $latestPackageRecordsByPackage->get($plan->id);
+
+            return [
+                $plan->id => [
+                    'id' => (int) $plan->id,
+                    'name' => (string) $plan->name,
+                    'price' => (float) $plan->price,
+                    'duration_label' => (string) $plan->duration_label,
+                    'description' => (string) ($plan->description ?? ''),
+                    'is_recommended' => (bool) $plan->is_recommended,
+                    'facilities' => is_array($plan->facilities) ? array_values($plan->facilities) : [],
+                    'broker_name' => (string) ($packageRecord?->broker_name ?? ''),
+                    'trading_id' => (string) ($packageRecord?->trading_id ?? ''),
+                    'trading_server' => (string) ($packageRecord?->trading_server ?? ''),
+                    'equity' => $packageRecord?->equity !== null ? (float) $packageRecord->equity : null,
+                ],
+            ];
+        });
 
         return view('customer.plan-request', [
             'selectedPackage' => $selectedPackage,
             'planOptions' => $planOptions,
+            'planMeta' => $planMeta,
             'latestStatus' => $latestStatus,
             'existingPackage' => $existingPackage,
         ]);
@@ -94,6 +150,21 @@ class InvestmentPlanController extends Controller
             return back()->withErrors(['package_id' => 'Selected package is not available.'])->withInput();
         }
 
+        $minDeposit = (float) $selectedPackage->price;
+        $equity = $validated['equity'] ?? null;
+
+        if ($equity === null || $equity === '') {
+            $equity = $minDeposit;
+        }
+
+        if ((float) $equity < $minDeposit) {
+            return back()
+                ->withErrors([
+                    'equity' => 'Account equity cannot be less than the selected package minimum deposit of $' . number_format($minDeposit, 2) . '.',
+                ])
+                ->withInput();
+        }
+
         $currentPackage = $user->userPackages()
             ->whereIn('status', ['pending', 'active_waiting', 'active', 'expired'])
             ->latest()
@@ -106,7 +177,7 @@ class InvestmentPlanController extends Controller
                 'trading_id' => $validated['trading_id'],
                 'trading_password' => $validated['trading_password'],
                 'trading_server' => $validated['trading_server'],
-                'equity' => $validated['equity'] ?? null,
+                'equity' => $equity,
                 'starts_at' => null,
                 'ends_at' => null,
                 'status' => 'pending',
@@ -119,7 +190,7 @@ class InvestmentPlanController extends Controller
                 'trading_id' => $validated['trading_id'],
                 'trading_password' => $validated['trading_password'],
                 'trading_server' => $validated['trading_server'],
-                'equity' => $validated['equity'] ?? null,
+                'equity' => $equity,
                 'starts_at' => null,
                 'ends_at' => null,
                 'status' => 'pending',

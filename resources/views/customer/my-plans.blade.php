@@ -5,7 +5,7 @@
             <div class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-slate-900">My Plans</h1>
-                    <p class="mt-2 text-sm text-slate-600">Track your subscriptions, expiry dates, and manage plan actions.</p>
+                    <p class="mt-2 text-sm text-slate-600">Track your subscriptions and manage plan actions.</p>
                 </div>
                 <a href="{{ route('investment-plans') }}" class="inline-flex items-center justify-center rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-all hover:bg-cyan-700 active:scale-95">
                     Browse Plans
@@ -44,15 +44,12 @@
                 </div>
                 <div class="px-6 py-8 md:px-8">
                     <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                        <!-- Left Column: Plan & Dates -->
+                        <!-- Left Column: Plan -->
                         <div class="space-y-8">
-                            <!-- Package Name + Duration -->
+                            <!-- Package Name -->
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Package Name</p>
                                 <p class="text-3xl font-bold text-slate-900">{{ $userPackage->package->name ?? 'N/A' }}</p>
-                                @if($userPackage->package?->duration_label)
-                                    <p class="mt-1 text-sm text-slate-500">{{ $userPackage->package->duration_label }}</p>
-                                @endif
                             </div>
 
                             <!-- Included Features -->
@@ -72,17 +69,6 @@
                                 </div>
                             @endif
 
-                            <!-- Dates -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">Start Date</p>
-                                    <p class="text-lg font-semibold text-slate-900">{{ $userPackage->starts_at ? $userPackage->starts_at->format('M d, Y') : 'Pending' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 mb-2">End Date</p>
-                                    <p class="text-lg font-semibold text-slate-900">{{ $userPackage->ends_at ? $userPackage->ends_at->format('M d, Y') : 'N/A' }}</p>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Right Column: Status, Equity & Broker Info -->
@@ -136,8 +122,6 @@
                         <thead>
                             <tr class="border-b border-slate-200 bg-slate-50">
                                 <th class="px-6 py-4 text-left font-semibold text-slate-700">Package</th>
-                                <th class="px-6 py-4 text-left font-semibold text-slate-700">Starts</th>
-                                <th class="px-6 py-4 text-left font-semibold text-slate-700">Ends</th>
                                 <th class="px-6 py-4 text-left font-semibold text-slate-700">Status</th>
                                 <th class="px-6 py-4 text-right font-semibold text-slate-700">Actions</th>
                             </tr>
@@ -146,17 +130,12 @@
                             <tr class="border-b border-slate-200 transition-colors hover:bg-slate-50">
                                 <td class="px-6 py-4">
                                     <div class="font-semibold text-slate-900">{{ $userPackage->package->name ?? '—' }}</div>
-                                    @if($userPackage->package?->duration_label)
-                                        <div class="mt-0.5 text-xs font-medium text-blue-600">{{ $userPackage->package->duration_label }}</div>
-                                    @endif
                                     @if(!empty($userPackage->package?->facilities) && is_array($userPackage->package->facilities))
                                         <div class="mt-1 text-xs text-slate-600">
                                             {{ implode(' • ', $userPackage->package->facilities) }}
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-slate-600">{{ $userPackage->starts_at ? $userPackage->starts_at->format('M d, Y') : '—' }}</td>
-                                <td class="px-6 py-4 text-slate-600">{{ $userPackage->ends_at ? $userPackage->ends_at->format('M d, Y') : '—' }}</td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em]
                                         @if($userPackage->status === 'active') bg-emerald-100 text-emerald-800

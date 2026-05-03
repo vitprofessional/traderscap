@@ -3,12 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserPackageResource\Pages;
+use App\Models\Package;
 use App\Models\UserPackage;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -21,8 +21,6 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\Str;
-use App\Models\Package;
-use Carbon\Carbon;
 use Filament\Forms\Components\Placeholder;
 
 class UserPackageResource extends Resource
@@ -55,45 +53,6 @@ class UserPackageResource extends Resource
                             ->label('Package')
                             ->searchable()
                             ->required()
-                            ->live()
-                            ->helperText('Selecting a package will auto-fill the start and end dates.')
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                if (!$state) {
-                                    return;
-                                }
-
-                                $package = Package::find($state);
-                                if (!$package) {
-                                    return;
-                                }
-
-                                // Set starts_at to today
-                                $set('starts_at', Carbon::today());
-
-                                // Set ends_at based on duration_days
-                                if ($package->duration_days) {
-                                    $set('ends_at', Carbon::today()->addDays($package->duration_days));
-                                }
-                            })
-                            ->afterStateHydrated(function ($state, callable $set, $record) {
-                                if (!$state || !$record) {
-                                    return;
-                                }
-
-                                // If starts_at or ends_at are empty, fill them based on package duration
-                                $package = Package::find($state);
-                                if (!$package) {
-                                    return;
-                                }
-
-                                if (!$record->starts_at) {
-                                    $set('starts_at', Carbon::today());
-                                }
-
-                                if (!$record->ends_at && $package->duration_days) {
-                                    $set('ends_at', Carbon::today()->addDays($package->duration_days));
-                                }
-                            })
                             ->columnSpanFull(),
                         Placeholder::make('package_summary')
                             ->label('Package summary')
@@ -107,19 +66,12 @@ class UserPackageResource extends Resource
                                     return '—';
                                 }
                                 $price = '$' . number_format($package->price, 0) . ' min deposit';
-                                $duration = $package->duration_label;
                                 $recommended = $package->is_recommended ? ' · ★ Recommended' : '';
                                 $facilitiesArr = is_array($package->facilities) ? $package->facilities : [];
                                 $facilities = !empty($facilitiesArr) ? implode(', ', $facilitiesArr) : 'No facilities listed';
-                                return "{$price} · {$duration}{$recommended} — {$facilities}";
+                                return "{$price}{$recommended} — {$facilities}";
                             })
                             ->columnSpanFull(),
-                        DatePicker::make('starts_at')
-                            ->label('Start date')
-                            ->helperText('Auto-set when a package is selected.'),
-                        DatePicker::make('ends_at')
-                            ->label('End date')
-                            ->helperText('Auto-calculated from the package duration.'),
                     ])
                     ->columnSpan(['default' => 1, 'lg' => 2]),
                 Section::make('Status')
@@ -136,7 +88,7 @@ class UserPackageResource extends Resource
                                 'expired' => 'Expired',
                             ])
                             ->required()
-                            ->helperText('Changing status here also updates dates in the table.')
+                            ->helperText('Set package lifecycle manually (e.g., Active or Expired).')
                             ->columnSpanFull(),
                     ])
                     ->columnSpan(['default' => 1, 'lg' => 1]),
@@ -179,15 +131,13 @@ class UserPackageResource extends Resource
                 ->label('Package')
                 ->searchable()
                 ->description(fn (UserPackage $record): string => $record->package
-                    ? '$' . number_format($record->package->price, 0) . ' · ' . $record->package->duration_label . ($record->package->is_recommended ? ' · ★ Recommended' : '')
+                    ? '$' . number_format($record->package->price, 0) . ($record->package->is_recommended ? ' · ★ Recommended' : '')
                     : '—'
                 ),
             TextColumn::make('broker_name')->label('Broker')->searchable()->toggleable(),
             TextColumn::make('trading_id')->label('Trading ID')->searchable()->toggleable(),
             TextColumn::make('trading_server')->label('Server')->searchable()->toggleable(),
             TextColumn::make('equity')->money('usd')->toggleable(),
-            TextColumn::make('starts_at')->date()->sortable(),
-            TextColumn::make('ends_at')->date()->sortable(),
             SelectColumn::make('status')
                 ->options([
                     'registered' => 'Registered',
@@ -197,33 +147,7 @@ class UserPackageResource extends Resource
                     'expired' => 'Expired',
                     'cancelled' => 'Cancelled',
                 ])
-                ->sortable()
-                ->afterStateUpdated(function ($record, $state) {
-                    $record->status = $state;
-
-                    // Update dates based on new status
-                    if ($state === 'active' || $state === 'active_waiting') {
-                        $record->starts_at = Carbon::today();
-                        if ($record->package && $record->package->duration_days) {
-                            $record->ends_at = Carbon::today()->addDays($record->package->duration_days);
-                        }
-                    } elseif ($state === 'pending') {
-                        // For pending, set starts_at to today and calculate ends_at
-                        $record->starts_at = Carbon::today();
-                        if ($record->package && $record->package->duration_days) {
-                            $record->ends_at = Carbon::today()->addDays($record->package->duration_days);
-                        }
-                    } elseif ($state === 'expired') {
-                        // For expired, set ends_at to today
-                        $record->ends_at = Carbon::today();
-                    } elseif ($state === 'registered' || $state === 'cancelled') {
-                        // For registered/cancelled, clear the dates
-                        $record->starts_at = null;
-                        $record->ends_at = null;
-                    }
-
-                    $record->save();
-                }),
+                ->sortable(),
         ])->filters([
             SelectFilter::make('status')
                 ->options([

@@ -41,7 +41,7 @@
             <section class="rounded-3xl border border-slate-200 bg-white px-5 py-6 shadow-sm md:px-8 md:py-8">
                 <div class="mb-8 text-center">
                     <h3 class="text-2xl font-semibold text-slate-900">Investment Plans</h3>
-                    <p class="mt-2 text-sm text-slate-600">Transparent min deposit amounts with clearly defined facilities and duration.</p>
+                    <p class="mt-2 text-sm text-slate-600">Transparent min deposit amounts with clearly defined facilities.</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 lg:gap-8">
@@ -99,7 +99,6 @@
                                     <span class="text-4xl font-black tracking-tighter">$</span><span class="text-5xl font-black tracking-tighter">{{ $formattedPrice }}</span>
                                 </div>
                                 <div class="mt-1 text-sm font-semibold text-white/95">Min Deposit</div>
-                                <div class="mt-2 text-xs font-medium text-white/85">/ {{ $plan->duration_label }}</div>
                             </div>
 
                             <div class="border-b border-slate-100 px-5 py-5 text-center md:px-7">

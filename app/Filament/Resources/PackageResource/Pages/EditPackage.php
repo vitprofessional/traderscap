@@ -14,7 +14,7 @@ class EditPackage extends EditRecord
 {
     protected static string $resource = PackageResource::class;
 
-    protected ?string $subheading = 'Update the package name, min deposit, duration, or listed facilities.';
+    protected ?string $subheading = 'Update the package name, min deposit, or listed facilities.';
 
     protected ?string $replacedRecommendedPackageName = null;
 
@@ -73,9 +73,6 @@ class EditPackage extends EditRecord
 
     private function normalizePackageData(array $data): array
     {
-        $durationType = (string) ($data['duration_type'] ?? 'monthly');
-        $durationValue = max(1, (int) ($data['duration_value'] ?? 1));
-
         $durationMultipliers = [
             'daily' => 1,
             'weekly' => 7,
@@ -83,10 +80,25 @@ class EditPackage extends EditRecord
             'yearly' => 365,
         ];
 
-        $multiplier = $durationMultipliers[$durationType] ?? 30;
+        $rawType = isset($data['duration_type']) ? trim((string) $data['duration_type']) : '';
+        $rawValue = $data['duration_value'] ?? null;
 
-        $data['duration_type'] = array_key_exists($durationType, $durationMultipliers) ? $durationType : 'monthly';
-        $data['duration_value'] = $durationValue;
+        $durationType = array_key_exists($rawType, $durationMultipliers) ? $rawType : null;
+        $durationValue = is_numeric($rawValue) ? max(1, (int) $rawValue) : null;
+
+        // If admin leaves duration fields blank while editing, keep existing stored values.
+        if (! $durationType && ! $durationValue) {
+            $durationType = $this->record->duration_type ?: 'daily';
+            $durationValue = (int) ($this->record->duration_value ?: 30);
+        } else {
+            $durationType ??= ($this->record->duration_type ?: 'daily');
+            $durationValue ??= (int) ($this->record->duration_value ?: 30);
+        }
+
+        $multiplier = $durationMultipliers[$durationType] ?? 1;
+
+        $data['duration_type'] = $durationType;
+        $data['duration_value'] = max(1, (int) $durationValue);
         $data['duration_days'] = $durationValue * $multiplier;
 
         $raw = $data['facilities'] ?? [];
