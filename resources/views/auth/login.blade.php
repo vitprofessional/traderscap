@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Customer Login</title>
+    <title>{{ config('app.name') }} - Customer Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -278,7 +278,7 @@
     <main class="login-shell" aria-label="Customer login page">
         <section class="login-brand" aria-hidden="true">
             <div>
-                <span class="badge">TraderScap Portal</span>
+                <span class="badge">{{ config('app.name') }} Portal</span>
                 <h1>Welcome back to your customer workspace.</h1>
                 <p>Review investment plans, track support tickets, and manage your account from one secure dashboard.</p>
             </div>

@@ -250,10 +250,22 @@
                 @if($topBrokers->isNotEmpty())
                 <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-slate-100">
                     @foreach($topBrokers as $broker)
+                    @php
+                        $brokerLogoUrl = null;
+
+                        if (filled($broker->logo)) {
+                            if (filter_var($broker->logo, FILTER_VALIDATE_URL)) {
+                                $brokerLogoUrl = $broker->logo;
+                            } else {
+                                $logoPath = preg_replace('#^(storage/app/public|public/storage|public|storage)/#', '', $broker->logo);
+                                $brokerLogoUrl = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($logoPath, '/'));
+                            }
+                        }
+                    @endphp
                     <div class="p-4 flex flex-col gap-3">
                         <div class="flex items-center gap-2">
-                            @if($broker->logo)
-                                <img src="{{ $broker->logo }}" alt="{{ $broker->name }}" class="w-8 h-8 rounded-lg object-contain bg-slate-50 border border-slate-100">
+                            @if($brokerLogoUrl)
+                                <img src="{{ $brokerLogoUrl }}" alt="{{ $broker->name }}" class="w-8 h-8 rounded-lg object-contain bg-slate-50 border border-slate-100">
                             @else
                                 <div class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold text-sm">{{ substr($broker->name,0,1) }}</div>
                             @endif

@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TradersCap - Find Your Best Broker</title>
+    <title>{{ config('app.name') }} - Find Your Best Broker</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100">
     <nav class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-indigo-600">TradersCap</h1>
+            <h1 class="text-2xl font-bold text-indigo-600">{{ config('app.name') }}</h1>
             <div class="space-x-4">
                 @auth
                     <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Customer Panel</a>

@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }} - Admin Login</title>
+    <title><?php echo e(config('app.name')); ?> - Admin Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
-    <script src="{{ asset('build/assets/app.js') }}" defer></script>
+    <link rel="stylesheet" href="<?php echo e(asset('build/assets/app.css')); ?>">
+    <script src="<?php echo e(asset('build/assets/app.js')); ?>" defer></script>
     <style>
         :root {
             --bg-1: #05080f;
@@ -259,7 +259,7 @@
     <main class="shell" aria-label="Admin login page">
         <section class="panel-left" aria-hidden="true">
             <div>
-                <span class="kicker">{{ env('APP_NAME') }} Admin</span>
+                <span class="kicker"><?php echo e(env('APP_NAME')); ?> Admin</span>
                 <h1>Administrative control panel access.</h1>
                 <p>Authenticate to manage users, operations, and internal workflows with audit-aware account controls.</p>
             </div>
@@ -270,16 +270,16 @@
             <h2>Admin Sign In</h2>
             <p class="sub">Enter your credentials to continue to the admin panel.</p>
 
-            @if($errors->any())
-                <div class="error" role="alert">{{ $errors->first() }}</div>
-            @endif
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
+                <div class="error" role="alert"><?php echo e($errors->first()); ?></div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            <form method="POST" action="{{ route('admin.login.attempt') }}" novalidate>
-                @csrf
+            <form method="POST" action="<?php echo e(route('admin.login.attempt')); ?>" novalidate>
+                <?php echo csrf_field(); ?>
 
                 <div>
                     <label for="email">Email Address</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                    <input id="email" name="email" type="email" value="<?php echo e(old('email')); ?>" required autocomplete="email" autofocus>
                 </div>
 
                 <div>
@@ -290,7 +290,7 @@
                 <div class="actions">
                     <label class="remember"><input type="checkbox" name="remember">Keep me signed in</label>
                     <div class="action-group">
-                        <a class="forgot" href="{{ route('admin.password.request') }}">Forgot password?</a>
+                        <a class="forgot" href="<?php echo e(route('admin.password.request')); ?>">Forgot password?</a>
                         <button type="submit" class="btn">Sign In</button>
                     </div>
                 </div>
@@ -301,3 +301,4 @@
     </main>
 </body>
 </html>
+<?php /**PATH C:\xampp\htdocs\traderscap\resources\views/admin/login.blade.php ENDPATH**/ ?>

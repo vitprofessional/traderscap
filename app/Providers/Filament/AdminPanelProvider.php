@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->authGuard(config('filament.auth.guard', 'admin'))
+            ->brandName(config('app.name'))
             ->path('admin')
             ->login(Login::class)
             ->registration(Register::class)

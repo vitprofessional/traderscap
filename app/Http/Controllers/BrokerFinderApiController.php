@@ -6,6 +6,7 @@ use App\Models\Broker;
 use App\Models\QuizQuestion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BrokerFinderApiController extends Controller
 {
@@ -145,7 +146,9 @@ class BrokerFinderApiController extends Controller
             return $path;
         }
 
-        return asset('public/storage/' . ltrim($path, '/'));
+            $normalizedPath = preg_replace('#^(storage/app/public|public/storage|public|storage)/#', '', $path);
+
+            return Storage::disk('public')->url(ltrim($normalizedPath, '/'));
     }
 
     private function normalizeJsonField($value): array

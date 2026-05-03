@@ -499,7 +499,7 @@
             <nav class="quiz-topbar">
                 <a href="{{ url('/') }}" class="quiz-brand">
                     <span class="quiz-brand__mark">TC</span>
-                    <span>Traderscap</span>
+                    <span>{{ config('app.name') }}</span>
                 </a>
                 <div class="quiz-topbar__links">
                     <a href="{{ url('/') }}" class="quiz-topbar__link">Home</a>
