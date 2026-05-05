@@ -303,16 +303,20 @@ class UserResource extends Resource
         ])
         ->recordActions([
             Action::make('editPackageDetails')
-                ->label(fn (User $record): string => $record->userPackages()->exists() ? 'Edit Package' : 'Add Package')
+                ->label(fn (?User $record): string => ($record && $record->userPackages()->exists()) ? 'Edit Package' : 'Add Package')
                 ->icon('heroicon-o-credit-card')
                 ->color('info')
                 ->button()
                 ->size('sm')
                 ->extraAttributes(['class' => 'w-full justify-center'])
-                ->visible(fn (User $record): bool => ! in_array((string) $record->account_status, ['registered', 'banned'], true))
+                ->visible(fn (?User $record): bool => $record !== null && ! in_array((string) $record->account_status, ['registered', 'banned'], true))
                 ->slideOver()
-                ->modalHeading(fn (User $record): string => $record->userPackages()->exists() ? 'Edit Package Details' : 'Add Package Details')
-                ->fillForm(function (User $record): array {
+                ->modalHeading(fn (?User $record): string => ($record && $record->userPackages()->exists()) ? 'Edit Package Details' : 'Add Package Details')
+                ->fillForm(function (?User $record): array {
+                    if (! $record) {
+                        return [];
+                    }
+
                     $pkg = $record->userPackages()->latest('id')->first();
                     if (! $pkg) {
                         return [];
@@ -390,7 +394,11 @@ class UserResource extends Resource
                                 ->columnSpanFull(),
                         ]),
                 ])
-                ->action(function (User $record, array $data): void {
+                ->action(function (?User $record, array $data): void {
+                    if (! $record) {
+                        return;
+                    }
+
                     $pkg = $record->userPackages()->latest('id')->first();
                     if ($pkg) {
                         $pkg->update($data);
