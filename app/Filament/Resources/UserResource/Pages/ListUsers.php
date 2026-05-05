@@ -10,6 +10,8 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ListUsers extends ListRecords
 {
@@ -70,6 +72,22 @@ class ListUsers extends ListRecords
 
     protected function applyTabScope(Builder $query, string $tab): Builder
     {
+        $hasStatus = static fn (string $status) => function ($subQuery) use ($status): void {
+            $subQuery
+                ->select(DB::raw(1))
+                ->from('user_packages')
+                ->whereColumn('user_packages.user_id', 'users.id')
+                ->where('user_packages.status', $status);
+        };
+
+        $hasAnyStatus = static fn (array $statuses) => function ($subQuery) use ($statuses): void {
+            $subQuery
+                ->select(DB::raw(1))
+                ->from('user_packages')
+                ->whereColumn('user_packages.user_id', 'users.id')
+                ->whereIn('user_packages.status', $statuses);
+        };
+
         // Register / Banned: purely from account_status
         if (in_array($tab, ['registered', 'banned'], true)) {
             return $query->where('account_status', $tab);
@@ -79,30 +97,112 @@ class ListUsers extends ListRecords
         $query->where('account_status', 'active');
 
         if ($tab === 'active') {
-            return $query->whereHas(
-                'userPackages',
-                fn (Builder $q): Builder => $q->where('status', 'active')
-            );
+            return $query->whereExists($hasStatus('active'));
         }
 
         if ($tab === 'active_waiting') {
             return $query
-                ->whereHas('userPackages', fn (Builder $q): Builder => $q->where('status', 'active_waiting'))
-                ->whereDoesntHave('userPackages', fn (Builder $q): Builder => $q->where('status', 'active'));
+                ->whereExists($hasStatus('active_waiting'))
+                ->whereNotExists($hasStatus('active'));
         }
 
         if ($tab === 'pending') {
             return $query
-                ->whereHas('userPackages', fn (Builder $q): Builder => $q->where('status', 'pending'))
-                ->whereDoesntHave('userPackages', fn (Builder $q): Builder => $q->whereIn('status', ['active', 'active_waiting']));
+                ->whereExists($hasStatus('pending'))
+                ->whereNotExists($hasAnyStatus(['active', 'active_waiting']));
         }
 
         if ($tab === 'expired') {
             return $query
-                ->whereHas('userPackages', fn (Builder $q): Builder => $q->where('status', 'expired'))
-                ->whereDoesntHave('userPackages', fn (Builder $q): Builder => $q->whereIn('status', ['active', 'active_waiting', 'pending']));
+                ->whereExists($hasStatus('expired'))
+                ->whereNotExists($hasAnyStatus(['active', 'active_waiting', 'pending']));
         }
 
         return $query;
+    }
+
+    protected function applyFiltersToTableQuery(Builder $query): Builder
+    {
+        $table = $this->getTable();
+
+        if ($table->hasDeferredFilters()) {
+            $this->getTableFiltersForm()->statePath('tableFilters')->flushCachedAbsoluteStatePaths();
+        }
+
+        try {
+            foreach ($table->getFilters() as $filter) {
+                $state = $this->getTableFilterState($filter->getName()) ?? [];
+
+                $filter->applyToBaseQuery($query, $state);
+                $filter->apply($query, $state);
+            }
+
+            return $query;
+        } finally {
+            if ($table->hasDeferredFilters()) {
+                $this->getTableFiltersForm()->statePath('tableDeferredFilters')->flushCachedAbsoluteStatePaths();
+            }
+        }
+    }
+
+    public function filterTableQuery(Builder $query): Builder
+    {
+        $this->applyFiltersToTableQuery($query);
+        $this->ensureQueryHasModel($query);
+
+        $this->applySearchToTableQuery($query);
+        $this->ensureQueryHasModel($query);
+
+        foreach ($this->getTable()->getVisibleColumns() as $column) {
+            $column->applyRelationshipAggregates($query);
+
+            if ($this->getTable()->isGroupsOnly()) {
+                continue;
+            }
+
+            $column->applyEagerLoading($query);
+        }
+
+        return $query;
+    }
+
+    public function getFilteredTableQuery(): ?Builder
+    {
+        $query = $this->getTable()->getQuery();
+
+        if (! $query) {
+            return null;
+        }
+
+        $this->ensureQueryHasModel($query);
+
+        return $this->filterTableQuery($query);
+    }
+
+    public function getFilteredSortedTableQuery(): ?Builder
+    {
+        $query = $this->getFilteredTableQuery();
+
+        if (! $query) {
+            return null;
+        }
+
+        $this->ensureQueryHasModel($query);
+
+        $this->applyGroupingToTableQuery($query);
+        $this->ensureQueryHasModel($query);
+
+        $this->applySortingToTableQuery($query);
+
+        return $query;
+    }
+
+    protected function ensureQueryHasModel(Builder $query): void
+    {
+        if ($query->getModel() instanceof Model) {
+            return;
+        }
+
+        $query->setModel(new User());
     }
 }

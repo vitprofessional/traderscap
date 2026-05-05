@@ -265,6 +265,22 @@ class UserResource extends Resource
                 ])
                 ->label('Status')
                 ->query(function (Builder $query, array $data): Builder {
+                    $hasStatus = static fn (string $status) => function ($subQuery) use ($status): void {
+                        $subQuery
+                            ->select(DB::raw(1))
+                            ->from('user_packages')
+                            ->whereColumn('user_packages.user_id', 'users.id')
+                            ->where('user_packages.status', $status);
+                    };
+
+                    $hasAnyStatus = static fn (array $statuses) => function ($subQuery) use ($statuses): void {
+                        $subQuery
+                            ->select(DB::raw(1))
+                            ->from('user_packages')
+                            ->whereColumn('user_packages.user_id', 'users.id')
+                            ->whereIn('user_packages.status', $statuses);
+                    };
+
                     $status = (string) ($data['value'] ?? '');
 
                     if ($status === '') {
@@ -280,22 +296,19 @@ class UserResource extends Resource
                     $query->where('account_status', 'active');
 
                     if ($status === 'active') {
-                        return $query->whereHas(
-                            'userPackages',
-                            fn (Builder $q): Builder => $q->where('status', 'active')
-                        );
+                        return $query->whereExists($hasStatus('active'));
                     }
 
                     if ($status === 'active_waiting') {
                         return $query
-                            ->whereHas('userPackages', fn (Builder $q): Builder => $q->where('status', 'active_waiting'))
-                            ->whereDoesntHave('userPackages', fn (Builder $q): Builder => $q->where('status', 'active'));
+                            ->whereExists($hasStatus('active_waiting'))
+                            ->whereNotExists($hasStatus('active'));
                     }
 
                     if ($status === 'pending') {
                         return $query
-                            ->whereHas('userPackages', fn (Builder $q): Builder => $q->where('status', 'pending'))
-                            ->whereDoesntHave('userPackages', fn (Builder $q): Builder => $q->whereIn('status', ['active', 'active_waiting']));
+                            ->whereExists($hasStatus('pending'))
+                            ->whereNotExists($hasAnyStatus(['active', 'active_waiting']));
                     }
 
                     return $query;
