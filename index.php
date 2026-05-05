@@ -1,19 +1,20 @@
 <?php
-/**
- * Laravel index.php wrapper for subdirectory installation (/traderscap)
- * Properly sets up server variables to maintain subdirectory awareness
- */
 
-// Ensure REQUEST_URI includes the subdirectory path for Laravel's URL generation
-if (!str_contains($_SERVER['REQUEST_URI'], '/traderscap')) {
-    $_SERVER['REQUEST_URI'] = '/traderscap' . $_SERVER['REQUEST_URI'];
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
+    require $maintenance;
 }
 
-// Set SCRIPT_NAME to the subdirectory entry point
-if (!str_contains($_SERVER['SCRIPT_NAME'], '/traderscap')) {
-    $_SERVER['SCRIPT_NAME'] = '/traderscap/index.php';
-}
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
 
-// Require the Laravel application
-require __DIR__ . '/public/index.php';
+// Bootstrap Laravel and handle the request...
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
 
+$app->handleRequest(Request::capture());

@@ -124,6 +124,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->recordUrl(null)
         ->modifyQueryUsing(
             fn (Builder $query): Builder => $query
                 ->with('latestUserPackage.package')
@@ -137,7 +138,7 @@ class UserResource extends Resource
         ->columns([
             TextColumn::make('name')
                 ->label('Customer Details')
-                ->searchable()
+                ->searchable(['name', 'email', 'phone', 'country.name'])
                 ->sortable()
                 ->html()
                 ->wrap()
@@ -206,7 +207,22 @@ class UserResource extends Resource
             TextColumn::make('latestUserPackage.broker_name')
                 ->label('Broker Credentials')
                 ->placeholder('Not submitted')
-                ->searchable()
+                ->searchable(query: function (Builder $query, string $search): Builder {
+                    return $query->orWhereExists(function ($sub) use ($search): void {
+                        $sub->select(DB::raw(1))
+                            ->from('user_packages')
+                            ->join('packages', 'packages.id', '=', 'user_packages.package_id')
+                            ->whereColumn('user_packages.user_id', 'users.id')
+                            ->where(function ($q) use ($search): void {
+                                $like = '%' . $search . '%';
+                                $q->where('user_packages.broker_name', 'like', $like)
+                                  ->orWhere('user_packages.trading_id', 'like', $like)
+                                  ->orWhere('user_packages.trading_server', 'like', $like)
+                                  ->orWhere('user_packages.equity', 'like', $like)
+                                  ->orWhere('packages.name', 'like', $like);
+                            });
+                    });
+                })
                 ->html()
                 ->wrap()
                 ->formatStateUsing(function (?string $state, User $record): HtmlString {
@@ -234,10 +250,10 @@ class UserResource extends Resource
                         . '<span style="font-weight:700;color:#111827;">' . $broker . '</span>'
                         . '<span style="font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid #d1d5db;background:#f9fafb;color:#374151;">' . e($packageStatus) . '</span>'
                         . '</div>'
-                        . '<div style="font-size:12px;color:#4b5563;">Package: <strong style="color:#1f2937;">' . $packageName . '</strong></div>'
+                        . '<div style="font-size:12px;color:#4b5563;">Package: <strong style="color:#1f2937;">' . $packageName . '</strong> | Equity: <strong>' . e($equity) . '</strong></div>'
                         . '<div style="font-size:12px;color:#374151;">Trading ID: <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">' . e($tradingId) . '</span></div>'
                         . '<div style="font-size:12px;color:#374151;">Password: <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">' . e($tradingPassword) . '</span></div>'
-                        . '<div style="font-size:12px;color:#374151;">Server: <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">' . e($server) . '</span> | Equity: <strong>' . e($equity) . '</strong></div>'
+                        . '<div style="font-size:12px;color:#374151;">Server: <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">' . e($server) . '</span></div>'
                         . '</div>'
                     );
                 })
@@ -253,7 +269,7 @@ class UserResource extends Resource
                 ->dateTime('M d, Y')
                 ->sortable(),
         ])
-        ->defaultSort('created_at', 'desc')
+        ->defaultSort('updated_at', 'desc')
         ->filters([
             SelectFilter::make('status')
                 ->options([
