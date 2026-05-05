@@ -25,6 +25,7 @@ use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\Placeholder;
 
+
 class UserPackageResource extends Resource
 {
     protected static ?string $model = UserPackage::class;
