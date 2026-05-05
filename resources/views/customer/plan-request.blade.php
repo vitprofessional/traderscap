@@ -11,7 +11,7 @@
                     <h2 class="mt-1 text-2xl font-semibold text-white md:text-3xl">Request: {{ $selectedPackage->name }}</h2>
                     <p class="mt-1 text-sm text-slate-200/80">
                         Account Status:
-                        <span class="ml-1 font-semibold text-white">{{ $latestStatus ? ucfirst(str_replace('_', ' ', $latestStatus)) : 'No Plan' }}</span>
+                        <span class="ml-1 font-semibold text-white">{{ $accountStatus ? ucfirst(str_replace('_', ' ', $accountStatus)) : 'Registered' }}</span>
                     </p>
                 </div>
                 <a href="{{ route('investment-plans') }}" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
@@ -222,6 +222,7 @@
                             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
                                 <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Broker Details</p>
                                 <div class="mt-2 space-y-1 text-sm text-slate-700">
+                                    <p><span class="font-semibold text-slate-900">Package Status:</span> <span id="package-status-preview">N/A</span></p>
                                     <p><span class="font-semibold text-slate-900">Broker:</span> <span id="broker-name-preview">N/A</span></p>
                                     <p><span class="font-semibold text-slate-900">Trading ID:</span> <span id="trading-id-preview">N/A</span></p>
                                     <p><span class="font-semibold text-slate-900">Server:</span> <span id="trading-server-preview">N/A</span></p>
@@ -266,6 +267,7 @@
             const brokerNamePreview = document.getElementById('broker-name-preview');
             const tradingIdPreview = document.getElementById('trading-id-preview');
             const tradingServerPreview = document.getElementById('trading-server-preview');
+            const packageStatusPreview = document.getElementById('package-status-preview');
 
             const packageName = document.getElementById('selected-package-name');
             const packageRecommended = document.getElementById('selected-package-recommended');
@@ -308,6 +310,18 @@
                 }).replace(/\.0$/, '');
 
                 return '$' + cleaned + 'k';
+            };
+
+            const formatStatus = (status) => {
+                const normalized = String(status || '').trim();
+                if (normalized === '') {
+                    return 'N/A';
+                }
+
+                return normalized
+                    .split('_')
+                    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                    .join(' ');
             };
 
             const getSelectedMeta = () => {
@@ -436,6 +450,11 @@
                 const packageBrokerName = String(meta.broker_name || '').trim();
                 const packageTradingId = String(meta.trading_id || '').trim();
                 const packageTradingServer = String(meta.trading_server || '').trim();
+                const packageStatus = String(meta.status || '').trim();
+
+                if (packageStatusPreview) {
+                    packageStatusPreview.textContent = formatStatus(packageStatus);
+                }
 
                 if (forceOverwrite || (equityInput.value || '').trim() === '') {
                     equityInput.value = safeEquity.toFixed(2);

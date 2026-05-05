@@ -78,10 +78,7 @@ class InvestmentPlanController extends Controller
 
         $planOptions = $activePlans->pluck('name', 'id');
 
-        $latestStatus = $user->userPackages()
-            ->whereIn('status', $eligibleStatuses)
-            ->latest()
-            ->value('status');
+        $accountStatus = (string) $user->account_status;
 
         // Get existing package data for pre-filling form during upgrade/downgrade
         $existingPackage = $user->userPackages()
@@ -110,6 +107,7 @@ class InvestmentPlanController extends Controller
                     'description' => (string) ($plan->description ?? ''),
                     'is_recommended' => (bool) $plan->is_recommended,
                     'facilities' => is_array($plan->facilities) ? array_values($plan->facilities) : [],
+                    'status' => (string) ($packageRecord?->status ?? ''),
                     'broker_name' => (string) ($packageRecord?->broker_name ?? ''),
                     'trading_id' => (string) ($packageRecord?->trading_id ?? ''),
                     'trading_server' => (string) ($packageRecord?->trading_server ?? ''),
@@ -122,7 +120,7 @@ class InvestmentPlanController extends Controller
             'selectedPackage' => $selectedPackage,
             'planOptions' => $planOptions,
             'planMeta' => $planMeta,
-            'latestStatus' => $latestStatus,
+            'accountStatus' => $accountStatus,
             'existingPackage' => $existingPackage,
         ]);
     }

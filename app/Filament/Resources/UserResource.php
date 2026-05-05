@@ -211,7 +211,7 @@ class UserResource extends Resource
                 ->wrap()
                 ->formatStateUsing(function (?string $state, User $record): HtmlString {
                     if (in_array((string) $record->account_status, ['registered', 'banned'], true)) {
-                        return new HtmlString('<span style="color:#6b7280;">No package details linked to this profile.</span>');
+                        return new HtmlString('<span style="color:#6b7280;">No details found</span>');
                     }
 
                     $package = $record->latestUserPackage;
