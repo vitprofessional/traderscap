@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'pending_email',
         'status',
+        'account_status',
         'avatar',
         'phone',
         'country_id',
@@ -49,6 +50,25 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (self $user): void {
+            if (! $user->wasChanged('account_status')) {
+                return;
+            }
+
+            if (in_array($user->account_status, ['registered', 'banned'], true)) {
+                $latestPackage = $user->userPackages()->latest('id')->first();
+
+                if ($latestPackage) {
+                    $latestPackage->delete();
+                }
+
+                $user->syncStatus();
+            }
+        });
     }
 
     public function country()

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class UserPackage extends Model
 {
@@ -18,6 +19,21 @@ class UserPackage extends Model
     protected static function boot(): void
     {
         parent::boot();
+
+        static::saving(function (self $up): void {
+            if (blank($up->package_id) || blank($up->equity)) {
+                return;
+            }
+
+            $minimumDeposit = (float) (Package::query()->whereKey($up->package_id)->value('price') ?? 0);
+            $equity = (float) $up->equity;
+
+            if ($equity < $minimumDeposit) {
+                throw ValidationException::withMessages([
+                    'equity' => 'Deposit Amount/Equity cannot be less than the package minimum deposit ($' . number_format($minimumDeposit, 2) . ').',
+                ]);
+            }
+        });
 
         $sync = function (self $up): void {
             optional($up->user)->syncStatus();

@@ -271,6 +271,14 @@ class AdminPanelProvider extends PanelProvider
     body.fi-panel-admin .fi-topbar-item-btn {
         padding: 0.65rem 0.9rem;
     }
+
+    body.fi-panel-admin .fi-ta-actions.users-actions-vertical {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.5rem;
+    }
 </style>
 HTML
             )

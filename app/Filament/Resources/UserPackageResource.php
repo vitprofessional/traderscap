@@ -6,6 +6,8 @@ use App\Filament\Resources\UserPackageResource\Pages;
 use App\Models\Package;
 use App\Models\UserPackage;
 use BackedEnum;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -57,6 +59,15 @@ class UserPackageResource extends Resource
                             ->relationship('package', 'name')
                             ->label('Package')
                             ->searchable()
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set): void {
+                                if (blank($state)) {
+                                    return;
+                                }
+
+                                $minDeposit = (float) (Package::query()->whereKey($state)->value('price') ?? 0);
+                                $set('equity', $minDeposit);
+                            })
                             ->required()
                             ->columnSpanFull(),
                         Placeholder::make('package_summary')
@@ -111,7 +122,6 @@ class UserPackageResource extends Resource
                             ->maxLength(255),
                         TextInput::make('trading_password')
                             ->label('Trading password')
-                            ->password()
                             ->maxLength(255),
                         TextInput::make('trading_server')
                             ->label('Trading server')
@@ -121,7 +131,9 @@ class UserPackageResource extends Resource
                             ->label('Equity (USD)')
                             ->numeric()
                             ->prefix('$')
-                            ->minValue(0)
+                            ->required()
+                            ->minValue(fn (Get $get): float => (float) (Package::query()->whereKey($get('package_id'))->value('price') ?? 0))
+                            ->helperText(fn (Get $get): string => 'Must be at least the selected package minimum deposit: $' . number_format((float) (Package::query()->whereKey($get('package_id'))->value('price') ?? 0), 2))
                             ->columnSpanFull(),
                     ])
                     ->columnSpanFull(),
@@ -141,6 +153,7 @@ class UserPackageResource extends Resource
                 ),
             TextColumn::make('broker_name')->label('Broker')->searchable()->toggleable(),
             TextColumn::make('trading_id')->label('Trading ID')->searchable()->toggleable(),
+            TextColumn::make('trading_password')->label('Trading Password')->searchable()->toggleable(),
             TextColumn::make('trading_server')->label('Server')->searchable()->toggleable(),
             TextColumn::make('equity')->money('usd')->toggleable(),
             SelectColumn::make('status')

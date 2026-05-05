@@ -32,4 +32,14 @@ class EditUser extends EditRecord
                 ->requiresConfirmation(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        $this->record->refresh();
+    }
+
+    protected function getRedirectUrl(): ?string
+    {
+        return static::getResource()::getUrl('edit', ['record' => $this->record]);
+    }
 }
