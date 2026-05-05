@@ -195,6 +195,12 @@ class InvestmentPlanController extends Controller
             ]);
         }
 
+        // Automatically activate the account when trading details are submitted.
+        if ((string) $user->account_status !== 'active') {
+            $user->account_status = 'active';
+            $user->saveQuietly();
+        }
+
         return redirect()->route('my-plans')->with('success', 'Plan request submitted successfully. Waiting for admin verification.');
     }
 }
